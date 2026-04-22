@@ -41,7 +41,7 @@ members = [
 
 [[package]]
 name = "aglet"
-version = "0.1.0a2"
+version = "0.1.0a3"
 source = { editable = "packages/aglet" }
 dependencies = [
     { name = "anyio" },
@@ -53,7 +53,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "anyio", specifier = ">=4.3" },
-    { name = "httpx", specifier = ">=0.27" },
+    { name = "httpx", specifier = ">=0.27,<1.0" },
     { name = "pydantic", specifier = ">=2.6" },
     { name = "pyyaml", specifier = ">=6.0" },
 ]
@@ -147,7 +147,7 @@ requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
 name = "aglet-builtin-model-openai"
-version = "0.1.0a1"
+version = "0.1.0a2"
 source = { editable = "packages/aglet-builtin/model-openai" }
 dependencies = [
     { name = "aglet" },
@@ -157,7 +157,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "aglet", editable = "packages/aglet" },
-    { name = "httpx", specifier = ">=0.27" },
+    { name = "httpx", specifier = ">=0.27,<1.0" },
 ]
 
 [[package]]
@@ -317,7 +317,7 @@ requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
 name = "aglet-builtin-tool-http-openapi"
-version = "0.1.0a1"
+version = "0.1.0a2"
 source = { editable = "packages/aglet-builtin/tool-http-openapi" }
 dependencies = [
     { name = "aglet" },
@@ -327,12 +327,12 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "aglet", editable = "packages/aglet" },
-    { name = "httpx", specifier = ">=0.27" },
+    { name = "httpx", specifier = ">=0.27,<1.0" },
 ]
 
 [[package]]
 name = "aglet-builtin-tool-local-python"
-version = "0.1.0a1"
+version = "0.1.0a2"
 source = { editable = "packages/aglet-builtin/tool-local-python" }
 dependencies = [
     { name = "aglet" },
@@ -369,7 +369,7 @@ requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
 name = "aglet-cli"
-version = "0.1.0a3"
+version = "0.1.0a4"
 source = { editable = "packages/aglet-cli" }
 dependencies = [
     { name = "aglet" },

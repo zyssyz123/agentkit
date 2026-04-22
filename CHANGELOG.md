@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.0a5 — first-time-user dogfood hot-fixes (2026-04-22)
+
+Ran the README tutorial **verbatim** in a fresh venv and found four real bugs
+that blocked new users. All fixed and republished.
+
+| # | Bug | Fix |
+| --- | --- | --- |
+| 1 | `aglet init` scaffold referenced `observability.jsonl`, which wasn't in the README's minimum install list → the first `aglet run` crashed with "No Technique 'observability.jsonl' registered." | `aglet-cli 0.1.0a4` — scaffold now uses only `observability.console`, matching the quickstart exactly. A comment tells users how to opt into the jsonl exporter. |
+| 2 | README's ReAct example used `import: datetime:datetime.utcnow`, but `local_python` only did a single `getattr(module, attr)` so nested class-method paths failed. | `aglet-builtin-tool-local-python 0.1.0a2` — split the post-colon attr on dots and walk deeper. |
+| 3 | `--pre` allowed uv to resolve `httpx==1.0.dev3`, which dropped the top-level `httpx.AsyncClient` attribute. Any real LLM call then crashed with AttributeError. | `aglet 0.1.0a3`, `aglet-builtin-model-openai 0.1.0a2`, `aglet-builtin-tool-http-openapi 0.1.0a2` — pinned `httpx>=0.27,<1.0`. |
+| 4 | Cosmetic: README badge still said "143 passing" (we are at 162). Scaffold description still said "built with Aglet M1". | README badge bumped; scaffold description rewritten. |
+
+Packages republished: `aglet`, `aglet-cli`, `aglet-builtin-model-openai`,
+`aglet-builtin-tool-http-openapi`, `aglet-builtin-tool-local-python`.
+
+Validated against PyPI in a fresh venv: minimum install + `aglet init` +
+`aglet run` + tool.utcnow roundtrip + httpx stays at `0.28.1`.
+
 ## 0.1.0a4 — M5 completion (2026-04-22)
 
 Two more brand-new distributions finishing M5's "summary + constitutional"

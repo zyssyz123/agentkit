@@ -7,7 +7,7 @@
 [![PyPI](https://img.shields.io/pypi/v/aglet?label=aglet&color=blue)](https://pypi.org/project/aglet/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](pyproject.toml)
-[![Tests](https://img.shields.io/badge/tests-143%20passing-brightgreen)](tests/)
+[![Tests](https://img.shields.io/badge/tests-162%20passing-brightgreen)](tests/)
 
 A pluggable Agent runtime where **every Element** (perception, memory, planner,
 tool, executor, safety, output, observability, extensibility) **and every
@@ -106,7 +106,7 @@ elements:
         config:
           tools:
             - name: now_iso
-              import: datetime:datetime.utcnow
+              import: aglet_builtin_tool_local_python.demo:now_iso
   executor: { techniques: [{ name: sequential }] }
   safety:   { techniques: [{ name: budget_only }] }
   output:   { techniques: [{ name: streaming_text }] }

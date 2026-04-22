@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aglet-builtin-tool-local-python"
-version = "0.1.0a1"
+version = "0.1.0a2"
 description = "Aglet built-in tool technique: register local Python callables as Tools."
 authors = [{ name = "The Aglet Contributors" }]
 license = "Apache-2.0"

@@ -48,7 +48,11 @@ console = Console()
 SCAFFOLD_AGENT_YAML = """\
 schema_version: "1.0"
 name: {name}
-description: An echo agent built with Aglet M1.
+description: >
+  Echo agent scaffolded by `aglet init`. Uses only the minimum set of
+  Techniques listed in the README quickstart, so it runs straight out of
+  `pip install --pre aglet aglet-cli aglet-builtin-*` without pulling any
+  extra packages.
 
 elements:
   perception:
@@ -81,9 +85,6 @@ elements:
   observability:
     techniques:
       - name: console
-      - name: jsonl
-        config:
-          directory: .aglet/runs
 
 budget:
   max_steps: 5
@@ -91,6 +92,9 @@ budget:
   max_seconds: 30
   max_cost_usd: 0.01
 
+# The default JSONL trace store writes .aglet/runs/<run_id>.jsonl next to your
+# agent — uncomment and install `aglet-builtin-obs-jsonl` to also stream every
+# event into a separate per-run .events.jsonl file.
 store:
   type: jsonl
   directory: .aglet/runs

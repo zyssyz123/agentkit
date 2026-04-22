@@ -52,7 +52,11 @@ class LocalPythonTool:
         if not attr:
             module_path, attr = dotted.rsplit(".", 1)
         module = importlib.import_module(module_path)
-        func = getattr(module, attr)
+        # Support `module:Class.method` and deeper nesting: walk the dots
+        # after the colon so e.g. `datetime:datetime.utcnow` resolves cleanly.
+        func: Any = module
+        for part in attr.split("."):
+            func = getattr(func, part)
         spec = ToolSpec(
             name=name,
             description=entry.get("description", func.__doc__ or ""),
