@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aglet-cli"
-version = "0.1.0a4"
+version = "0.1.0a5"
 description = "Aglet command-line interface (init / run / elements / techniques)."
 authors = [{ name = "The Aglet Contributors" }]
 license = "Apache-2.0"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "aglet>=0.1.0a1",
+    "aglet>=0.1.0a4",
     "typer>=0.12",
     "rich>=13.7",
 ]

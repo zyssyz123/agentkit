@@ -38,7 +38,7 @@ from aglet.models import (
     ModelToolCall,
 )
 from aglet.registry import Registry, get_registry
-from aglet.runtime import Runtime
+from aglet.runtime import AgentConfigError, Runtime
 from aglet.store import ContextStore, InMemoryContextStore, JsonlContextStore
 
 __all__ = [
@@ -64,6 +64,7 @@ __all__ = [
     "HookCallable",
     "HookManager",
     # Runtime
+    "AgentConfigError",
     "Runtime",
     "ElementHub",
     "ElementHost",

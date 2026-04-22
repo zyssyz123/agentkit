@@ -324,11 +324,27 @@ def doctor(
     console.print(f"\n[bold]Validating[/] {config_path} (agent: [cyan]{cfg.name}[/])")
 
     problems: list[str] = []
+
+    # --- sanity: the canonical Loop depends on these two Elements. ---
+    from aglet.runtime import _RECOMMENDED_ELEMENTS, _REQUIRED_ELEMENTS
+
+    for name in _REQUIRED_ELEMENTS:
+        el = cfg.elements.get(name)
+        if el is None or not el.techniques:
+            problems.append(
+                f"missing required element {name!r} (canonical Loop would emit nothing)"
+            )
+            console.print(f"  [red]error[/]   element [bold]{name}[/] has zero techniques")
+    for name in _RECOMMENDED_ELEMENTS:
+        el = cfg.elements.get(name)
+        if el is None or not el.techniques:
+            console.print(f"  [yellow]warn[/]   element [bold]{name}[/] has zero techniques")
+
     for element_name, element_cfg in cfg.elements.items():
         for tech_cfg in element_cfg.techniques:
             qualified = f"{element_name}.{tech_cfg.name}"
             if qualified in registry.technique_factories:
-                console.print(f"  [green]ok[/]  {qualified}")
+                console.print(f"  [green]ok[/]     {qualified}")
             else:
                 same_element = registry.list_techniques(element_name)
                 hint = (
@@ -344,7 +360,7 @@ def doctor(
         factories = ModelHub.discover_factories()
         for prov in cfg.providers:
             if prov.type in factories:
-                console.print(f"  [green]ok[/]  provider {prov.name} -> {prov.type}")
+                console.print(f"  [green]ok[/]     provider {prov.name} -> {prov.type}")
             else:
                 problems.append(
                     f"provider '{prov.name}' wants type '{prov.type}' which is not installed"

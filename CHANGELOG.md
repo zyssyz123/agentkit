@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.1.0a6 — config sanity guards (2026-04-22)
+
+A follow-on dogfood session tested what happens when an agent.yaml is
+missing an Element or has `techniques: []`. Found that:
+
+* Missing `planner` or empty `planner.techniques`: run completes silently
+  with empty output, exit code 0. **Terrible first-time-user trap.**
+* Missing `output`: the planner actually produces an answer but it's never
+  rendered. Also silent.
+* Unknown technique name (e.g. `name: does_not_exist`): correctly errors.
+  ✅ already good.
+* Missing `perception` / `safety`: mostly harmless.
+
+Fixed in:
+
+* **aglet 0.1.0a4** — `Runtime.from_config` now sanity-checks the config
+  before building anything else. `planner` and `output` are REQUIRED (must
+  be declared AND have at least one technique); missing either raises
+  `AgentConfigError`. `perception` and `safety` are RECOMMENDED and emit a
+  warning via the `aglet.runtime` logger but don't block.
+
+* **aglet-cli 0.1.0a5** — `aglet doctor` surfaces the same distinction
+  with `error` (red) and `warn` (yellow) rows before the per-technique
+  `ok` list.
+
+The idea is that `aglet doctor` should always be a reliable preflight:
+green = `aglet run` will produce a final answer; yellow = probably fine
+but notice these; red = the run will fail loudly instead of silently.
+
 ## 0.1.0a5 — first-time-user dogfood hot-fixes (2026-04-22)
 
 Ran the README tutorial **verbatim** in a fresh venv and found four real bugs

@@ -88,6 +88,10 @@ class Runtime:
         # external runtime hands us its component list.
         external_runtimes = _bootstrap_external_plugins(cfg, registry)
 
+        # Fail closed on catastrophic misconfigurations (empty planner, empty output)
+        # rather than letting the canonical Loop silently produce empty results.
+        _sanity_check_config(cfg)
+
         models = _build_model_hub(cfg)
         hub = _build_hub(cfg, registry, models)
         bus = EventBus()
@@ -481,6 +485,61 @@ class _HookedToolHost:
             )
         )
         return result
+
+
+# Sanity checks — the two Elements every useful agent must actually have
+# configured with at least one Technique. Without these, the canonical Loop
+# silently produces an empty result — catastrophic for new users.
+_REQUIRED_ELEMENTS: tuple[str, ...] = ("planner", "output")
+
+# Strongly recommended — we warn but don't fail, because there ARE advanced
+# use cases (e.g. a custom Runtime loop) where these might legitimately be
+# absent.
+_RECOMMENDED_ELEMENTS: tuple[str, ...] = ("perception", "safety")
+
+
+class AgentConfigError(ValueError):
+    """Raised when an agent.yaml is structurally unusable with the default Loop."""
+
+
+def _sanity_check_config(cfg: AgentConfig) -> None:
+    """Verify the config declares every Element the canonical Loop depends on.
+
+    Specifically:
+      * ``planner`` must exist and have at least one Technique; otherwise the
+        Loop produces no thought / action / final answer and the run returns
+        an empty string with exit code 0 — a terrible UX trap.
+      * ``output`` must exist and have at least one Technique; otherwise the
+        planner's ``Plan.final_answer`` is never rendered for the caller.
+
+    Missing-but-recommended Elements produce a warning on stderr (via logging);
+    missing-and-required Elements raise :class:`AgentConfigError` before the
+    run starts.
+    """
+    missing_required: list[str] = []
+    for name in _REQUIRED_ELEMENTS:
+        element_cfg = cfg.elements.get(name)
+        if element_cfg is None or not element_cfg.techniques:
+            missing_required.append(name)
+
+    if missing_required:
+        noun = "element" if len(missing_required) == 1 else "elements"
+        names = ", ".join(sorted(missing_required))
+        raise AgentConfigError(
+            f"agent.yaml {noun} missing or empty: {names}. "
+            "The canonical Loop would produce an empty result. "
+            "Add at least one technique to each (e.g. `planner: {techniques: [{name: echo}]}`). "
+            "If you really want to skip these, plug in a custom Runtime."
+        )
+
+    for name in _RECOMMENDED_ELEMENTS:
+        element_cfg = cfg.elements.get(name)
+        if element_cfg is None or not element_cfg.techniques:
+            log.warning(
+                "agent.yaml recommended element %r is missing or empty; "
+                "continuing, but behaviour may be surprising",
+                name,
+            )
 
 
 def _bootstrap_external_plugins(cfg: AgentConfig, registry: Registry) -> list:
