@@ -100,8 +100,19 @@ class Runtime:
 
     # ---------- public API --------------------------------------------------------------------
 
-    async def run(self, input_text: str, *, conversation_id: str = "") -> AsyncIterator[Event]:
-        """Run a single turn and stream all Events to the caller."""
+    async def run(
+        self,
+        input_text: str,
+        *,
+        conversation_id: str = "",
+        history: tuple[Message, ...] | list[Message] = (),
+    ) -> AsyncIterator[Event]:
+        """Run a single turn and stream all Events to the caller.
+
+        Pass ``history`` to thread previous turns of a multi-turn conversation through
+        ``ctx.history``; the new user message is appended automatically.
+        """
+        prior = tuple(history)
         ctx = AgentContext(
             conversation_id=conversation_id,
             raw_input=RawInput(text=input_text),
@@ -111,7 +122,7 @@ class Runtime:
                 max_seconds=self.config.budget.max_seconds,
                 max_cost_usd=self.config.budget.max_cost_usd,
             ),
-            history=(Message(role="user", content=input_text),),
+            history=prior + (Message(role="user", content=input_text),),
         )
         async for ev in self._loop(ctx):
             yield ev
@@ -336,22 +347,59 @@ def _build_hub(cfg: AgentConfig, registry: Registry, models: ModelHub) -> Elemen
 
 
 def _instantiate_technique(factory, config: dict, models: ModelHub):
-    """Instantiate a Technique factory tolerantly: accept models / config kwargs as available."""
+    """Instantiate a Technique factory tolerantly.
+
+    We probe four signatures in order, choosing the richest one the factory accepts:
+
+    1. ``factory(config=config, models=models)``
+    2. ``factory(boot=BootContext(...))``
+    3. ``factory(config=config)``
+    4. ``factory(config)`` (positional)
+    5. ``factory()``
+
+    We **only** swallow ``TypeError`` raised by Python's argument-binding step itself;
+    any other exception (or a TypeError raised inside the factory body) is re-raised
+    with the qualified Technique name attached, so plugin bugs are not silently masked.
+    """
     boot = BootContext(config=config, models=models)
-    # Try richest signature first.
-    for kwargs in (
-        {"config": config, "models": models},
-        {"boot": boot},
-        {"config": config},
-    ):
-        try:
-            return factory(**kwargs)
-        except TypeError:
-            continue
+    import inspect
+
+    sig = None
     try:
-        return factory(config)
-    except TypeError:
-        return factory()
+        sig = inspect.signature(factory)
+    except (TypeError, ValueError):
+        sig = None
+
+    def _accepts(kwargs: dict) -> bool:
+        if sig is None:
+            return True  # No introspection — fall back to try/except.
+        try:
+            sig.bind_partial(**kwargs)
+            return True
+        except TypeError:
+            return False
+
+    candidates: list[tuple[tuple, dict]] = [
+        ((), {"config": config, "models": models}),
+        ((), {"boot": boot}),
+        ((), {"config": config}),
+        ((config,), {}),
+        ((), {}),
+    ]
+    last_bind_failure: TypeError | None = None
+    for args, kwargs in candidates:
+        # Skip signatures we know won't bind, when introspection is available.
+        if kwargs and not _accepts(kwargs):
+            continue
+        try:
+            return factory(*args, **kwargs)
+        except TypeError as exc:
+            last_bind_failure = exc
+            continue
+
+    raise RuntimeError(
+        f"Could not call Technique factory {factory!r} with any known signature"
+    ) from last_bind_failure
 
 
 def _attach_run(event: Event, run_id: str) -> Event:

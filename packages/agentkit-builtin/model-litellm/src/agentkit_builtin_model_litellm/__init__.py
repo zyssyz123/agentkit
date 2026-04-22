@@ -127,9 +127,25 @@ class LiteLLMProvider:
 
 
 def _to_dict(m: ModelMessage) -> dict[str, Any]:
+    import json as _json
+
     out: dict[str, Any] = {"role": m.role, "content": m.content}
     if m.name:
         out["name"] = m.name
     if m.tool_call_id:
         out["tool_call_id"] = m.tool_call_id
+    if m.tool_calls:
+        out["tool_calls"] = [
+            {
+                "id": tc.id,
+                "type": "function",
+                "function": {
+                    "name": tc.name,
+                    "arguments": _json.dumps(tc.arguments, ensure_ascii=False),
+                },
+            }
+            for tc in m.tool_calls
+        ]
+        if m.role == "assistant" and not m.content:
+            out["content"] = None
     return out

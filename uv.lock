@@ -24,6 +24,7 @@ members = [
     "agentkit-builtin-tool-local-python",
     "agentkit-builtin-tool-mcp",
     "agentkit-cli",
+    "agentkit-demo-compliance",
     "agentkit-server",
     "agentkit-workspace",
 ]
@@ -295,6 +296,17 @@ requires-dist = [
 ]
 
 [[package]]
+name = "agentkit-demo-compliance"
+version = "0.1.0"
+source = { editable = "examples/third-party-element-demo" }
+dependencies = [
+    { name = "agentkit" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+
+[[package]]
 name = "agentkit-server"
 version = "0.1.0"
 source = { editable = "packages/agentkit-server" }
@@ -338,6 +350,7 @@ dev = [
     { name = "agentkit-builtin-tool-local-python" },
     { name = "agentkit-builtin-tool-mcp" },
     { name = "agentkit-cli" },
+    { name = "agentkit-demo-compliance" },
     { name = "agentkit-server" },
     { name = "httpx" },
     { name = "pytest" },
@@ -371,6 +384,7 @@ dev = [
     { name = "agentkit-builtin-tool-local-python", editable = "packages/agentkit-builtin/tool-local-python" },
     { name = "agentkit-builtin-tool-mcp", editable = "packages/agentkit-builtin/tool-mcp" },
     { name = "agentkit-cli", editable = "packages/agentkit-cli" },
+    { name = "agentkit-demo-compliance", editable = "examples/third-party-element-demo" },
     { name = "agentkit-server", editable = "packages/agentkit-server" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "pytest", specifier = ">=8.0" },

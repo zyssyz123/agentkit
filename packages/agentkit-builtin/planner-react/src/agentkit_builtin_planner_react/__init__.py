@@ -27,7 +27,7 @@ from agentkit.context import (
     ToolCall,
 )
 from agentkit.events import Event, EventType
-from agentkit.models import ModelHub, ModelMessage
+from agentkit.models import ModelHub, ModelMessage, ModelToolCall
 
 DEFAULT_SYSTEM_PROMPT = """You are an AI agent. You can either:
 - Call one of the available tools to gather information, OR
@@ -128,29 +128,50 @@ class ReactPlanner:
     def _build_messages(self, ctx: AgentContext) -> list[ModelMessage]:
         msgs: list[ModelMessage] = [ModelMessage(role="system", content=self.system_prompt)]
 
+        # Inject recalled memory (RAG hits, summaries, episodic, …) as a system
+        # message so the model can ground its answer in retrieved context.
+        if ctx.recalled_memory:
+            joined = "\n".join(
+                f"- ({item.source}) {item.content}" for item in ctx.recalled_memory
+            )
+            msgs.append(
+                ModelMessage(
+                    role="system",
+                    content=f"Relevant context retrieved from memory:\n{joined}",
+                )
+            )
+
         # Conversation history (user + assistant messages from previous turns).
         for m in ctx.history:
             msgs.append(ModelMessage(role=m.role, content=m.content, name=m.name))
 
-        # Append tool observations from this turn so the model sees the loop's context.
+        # Replay this turn's tool round-trips so the model sees its own previous calls
+        # and the resulting observations. The assistant message MUST carry tool_calls
+        # so the provider can correlate tool_call_id on the subsequent tool message.
+        results_by_id = {r.call_id: r for r in ctx.tool_results}
         for call in ctx.tool_calls:
             msgs.append(
                 ModelMessage(
                     role="assistant",
                     content="",
-                    name=call.name,
+                    tool_calls=(
+                        ModelToolCall(id=call.id, name=call.name, arguments=call.arguments),
+                    ),
                 )
             )
-        for result in ctx.tool_results:
-            payload = result.output if result.error is None else f"ERROR: {result.error}"
-            content = payload if isinstance(payload, str) else json.dumps(payload, default=str)
-            msgs.append(
-                ModelMessage(
-                    role="tool",
-                    content=content,
-                    tool_call_id=result.call_id,
+            result = results_by_id.get(call.id)
+            if result is not None:
+                payload = result.output if result.error is None else f"ERROR: {result.error}"
+                content = (
+                    payload if isinstance(payload, str) else json.dumps(payload, default=str)
                 )
-            )
+                msgs.append(
+                    ModelMessage(
+                        role="tool",
+                        content=content,
+                        tool_call_id=call.id,
+                    )
+                )
         return msgs
 
     @staticmethod

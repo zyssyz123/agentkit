@@ -47,12 +47,17 @@ ENTRY_POINT_GROUP_MODELS = "agentkit.models"
 
 @dataclass(frozen=True)
 class ModelMessage:
-    """A single chat message passed to a chat-capable provider."""
+    """A single chat message passed to a chat-capable provider.
+
+    For assistant messages that issued tool calls, ``tool_calls`` must be populated so
+    the provider can correlate subsequent ``role="tool"`` responses by ``tool_call_id``.
+    """
 
     role: Literal["system", "user", "assistant", "tool"]
-    content: str
+    content: str = ""
     name: str | None = None
     tool_call_id: str | None = None
+    tool_calls: tuple["ModelToolCall", ...] = ()
 
 
 @dataclass(frozen=True)

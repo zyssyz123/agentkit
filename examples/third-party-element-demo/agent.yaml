@@ -1,0 +1,47 @@
+schema_version: "1.0"
+name: compliance-demo-agent
+description: |
+  An echo-style agent that ALSO uses a third-party-contributed Element ('compliance').
+  This proves AgentKit's two-dimensional pluggability: a 3rd-party plugin contributes
+  BOTH a brand-new Element kind AND a Technique implementing it, all via PyPI entry-points.
+
+elements:
+  perception:
+    techniques:
+      - name: passthrough
+
+  memory:
+    techniques:
+      - name: sliding_window
+
+  planner:
+    techniques:
+      - name: echo
+        config: { prefix: "Echo: " }
+
+  safety:
+    techniques:
+      - name: budget_only
+
+  output:
+    techniques:
+      - name: streaming_text
+
+  observability:
+    techniques:
+      - name: console
+
+  # ----- A NEW ELEMENT contributed by an external plugin -----
+  compliance:
+    techniques:
+      - name: cn_pii_scanner
+        config:
+          fail_on_finding: false
+          scan_field: raw_input
+
+budget:
+  max_steps: 4
+
+store:
+  type: memory
+  directory: .agentkit/runs

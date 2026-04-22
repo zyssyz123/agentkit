@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentkit-demo-compliance"
+version = "0.1.0"
+description = "Demo: a third-party plugin that contributes (a) a brand-new Element 'compliance' AND (b) a Technique implementing it. Validates AgentKit's two-dimensional pluggability promise."
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["agentkit>=0.1.0"]
+
+# Two entry-points groups: one new Element protocol, one Technique implementing it.
+[project.entry-points."agentkit.elements"]
+compliance = "agentkit_demo_compliance:ComplianceProtocol"
+
+[project.entry-points."agentkit.techniques"]
+"compliance.cn_pii_scanner" = "agentkit_demo_compliance:CnPiiScanner"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentkit_demo_compliance"]

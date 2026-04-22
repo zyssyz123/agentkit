@@ -10,6 +10,7 @@ members = [
     "packages/agentkit-cli",
     "packages/agentkit-server",
     "packages/agentkit-builtin/*",
+    "examples/third-party-element-demo",
 ]
 
 [tool.uv.sources]
@@ -34,6 +35,7 @@ agentkit-builtin-obs-langfuse = { workspace = true }
 agentkit-builtin-model-openai = { workspace = true }
 agentkit-builtin-model-litellm = { workspace = true }
 agentkit-builtin-model-mock = { workspace = true }
+agentkit-demo-compliance = { workspace = true }
 
 [dependency-groups]
 dev = [
@@ -56,6 +58,7 @@ dev = [
     "agentkit-builtin-obs-otel",
     "agentkit-builtin-model-openai",
     "agentkit-builtin-model-mock",
+    "agentkit-demo-compliance",
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
     "httpx>=0.27",

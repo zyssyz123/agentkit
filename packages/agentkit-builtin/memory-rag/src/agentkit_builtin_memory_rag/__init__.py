@@ -121,15 +121,24 @@ class RagMemory:
         try:
             await self._ensure()
         except Exception as exc:  # noqa: BLE001
-            log.warning("memory.rag setup failed: %s", exc)
+            log.warning(
+                "memory.rag setup failed (%s): %s", exc.__class__.__name__, exc, exc_info=True
+            )
             return ContextPatch.empty(self.element, self.name)
-        provider, model_id = self._require_embedder()
-        q_vec = (await provider.embed(model_id, [query]))[0]
+        try:
+            provider, model_id = self._require_embedder()
+            q_vec = (await provider.embed(model_id, [query]))[0]
 
-        def _search() -> list[dict[str, Any]]:
-            return self._table.search(q_vec).limit(self.top_k).to_list()
+            def _search() -> list[dict[str, Any]]:
+                return self._table.search(q_vec).limit(self.top_k).to_list()
 
-        rows = await asyncio.to_thread(_search)
+            rows = await asyncio.to_thread(_search)
+        except Exception as exc:  # noqa: BLE001
+            log.warning(
+                "memory.rag recall failed (%s): %s", exc.__class__.__name__, exc, exc_info=True
+            )
+            return ContextPatch.empty(self.element, self.name)
+
         items = [
             MemoryItem(
                 content=r["content"],
@@ -151,5 +160,7 @@ class RagMemory:
             await self._ensure()
             await self._ingest([item.content])
         except Exception as exc:  # noqa: BLE001
-            log.warning("memory.rag store failed: %s", exc)
+            log.warning(
+                "memory.rag store failed (%s): %s", exc.__class__.__name__, exc, exc_info=True
+            )
         return ContextPatch.empty(self.element, self.name)

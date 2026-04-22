@@ -32,10 +32,14 @@ class OpenAICompatProvider:
     name = "openai_compat"
     capabilities = frozenset({"chat", "stream", "tool_use", "embed"})
 
+    DEFAULT_BASE_URL = "https://api.openai.com/v1"
+
     def __init__(self, config: dict[str, Any] | None = None) -> None:
         cfg = config or {}
         self.api_key: str = _resolve(cfg.get("api_key", "${OPENAI_API_KEY}"))
-        self.base_url: str = cfg.get("base_url", "https://api.openai.com/v1").rstrip("/")
+        # Tolerate empty string from a missing env var by falling back to the OpenAI default.
+        base_url = (cfg.get("base_url") or "").strip() or self.DEFAULT_BASE_URL
+        self.base_url: str = base_url.rstrip("/")
         self.timeout_s: float = float(cfg.get("timeout_s", 60.0))
         self.default_headers: dict[str, str] = dict(cfg.get("default_headers", {}))
 
@@ -168,6 +172,21 @@ def _msg_to_openai(m: ModelMessage) -> dict[str, Any]:
         out["name"] = m.name
     if m.tool_call_id:
         out["tool_call_id"] = m.tool_call_id
+    if m.tool_calls:
+        out["tool_calls"] = [
+            {
+                "id": tc.id,
+                "type": "function",
+                "function": {
+                    "name": tc.name,
+                    "arguments": json.dumps(tc.arguments, ensure_ascii=False),
+                },
+            }
+            for tc in m.tool_calls
+        ]
+        # OpenAI rejects assistant tool-call messages with non-null content; coerce to None.
+        if m.role == "assistant" and not m.content:
+            out["content"] = None
     return out
 
 

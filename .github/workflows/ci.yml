@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.11", "3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Set up Python ${{ matrix.python-version }}
+        run: uv python install ${{ matrix.python-version }}
+
+      - name: Sync workspace
+        run: uv sync --python ${{ matrix.python-version }}
+
+      - name: Lint (ruff)
+        run: uv run ruff check .
+
+      - name: Run tests (unit + integration + conformance)
+        run: uv run pytest -v --tb=short
+
+      - name: Smoke test — echo agent CLI
+        run: |
+          uv run agentkit init /tmp/ci-agent
+          uv run agentkit run /tmp/ci-agent/agent.yaml --input "ci hello" --quiet
+
+      - name: Verify entry-points discovery
+        run: |
+          uv run agentkit elements
+          uv run agentkit techniques

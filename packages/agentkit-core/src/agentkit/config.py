@@ -3,11 +3,18 @@
 from __future__ import annotations
 
 import os
+import re
 from pathlib import Path
 from typing import Any
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
+
+# Matches ${VAR}, ${VAR:-default}, ${VAR:default}.
+# (?P<name>...)  variable name
+# (?P<sep>:-|:)  optional separator introducing a default
+# (?P<default>...) optional default value (anything except '}')
+_ENV_REF_RE = re.compile(r"\$\{(?P<name>[A-Za-z_][A-Za-z0-9_]*)(?:(?P<sep>:-|:)(?P<default>[^}]*))?\}")
 
 
 class TechniqueConfig(BaseModel):
@@ -76,8 +83,24 @@ class AgentConfig(BaseModel):
 # ---------- loader ---------------------------------------------------------------------------
 
 
+def expand_env(text: str) -> str:
+    """Expand ``${VAR}``, ``${VAR:-default}`` and ``${VAR:default}`` references.
+
+    Unlike :func:`os.path.expandvars` this honours shell-style default values, which
+    is the syntax users naturally reach for in YAML config files.
+    """
+
+    def _replace(m: re.Match[str]) -> str:
+        value = os.environ.get(m.group("name"))
+        if value is None or (m.group("sep") == ":-" and value == ""):
+            return m.group("default") if m.group("sep") else ""
+        return value
+
+    return _ENV_REF_RE.sub(_replace, text)
+
+
 def load_agent_config(path: str | Path) -> AgentConfig:
     raw = Path(path).read_text(encoding="utf-8")
-    expanded = os.path.expandvars(raw)
+    expanded = expand_env(raw)
     data = yaml.safe_load(expanded) or {}
     return AgentConfig.model_validate(data)
