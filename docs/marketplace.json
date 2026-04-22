@@ -42,6 +42,18 @@
       "official": true
     },
     {
+      "name": "aglet-builtin-memory-summary",
+      "kind": "technique",
+      "element": "memory",
+      "technique": "summary",
+      "version": "0.1.0a1",
+      "description": "Rolling LLM-summarised conversation history for long chats.",
+      "author": "The Aglet Contributors",
+      "license": "Apache-2.0",
+      "keywords": ["memory", "summary", "long-context"],
+      "official": true
+    },
+    {
       "name": "aglet-builtin-planner-echo",
       "kind": "technique",
       "element": "planner",
@@ -171,6 +183,18 @@
       "author": "The Aglet Contributors",
       "license": "Apache-2.0",
       "keywords": ["safety", "budget"],
+      "official": true
+    },
+    {
+      "name": "aglet-builtin-safety-constitutional",
+      "kind": "technique",
+      "element": "safety",
+      "technique": "constitutional",
+      "version": "0.1.0a1",
+      "description": "Constitutional-AI style safety: declare principles, LLM judge enforces them on pre/post checks.",
+      "author": "The Aglet Contributors",
+      "license": "Apache-2.0",
+      "keywords": ["safety", "constitutional", "judge", "principles"],
       "official": true
     },
     {

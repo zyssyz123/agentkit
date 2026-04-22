@@ -241,11 +241,11 @@ All live on PyPI as `0.1.0a2` (core) / `0.1.0a1` (builtins).
 | --- | --- |
 | Core | `aglet`, `aglet-cli`, `aglet-server`, `aglet-eval` |
 | Perception | `aglet-builtin-perception-passthrough` |
-| Memory | `aglet-builtin-memory-{sliding-window,rag}` |
-| Planner | `aglet-builtin-planner-{echo,react,reflexion,tot}` |
+| Memory | `aglet-builtin-memory-{sliding-window,rag,summary}` |
+| Planner | `aglet-builtin-planner-{echo,react,reflexion,tot,workflow}` |
 | Tool | `aglet-builtin-tool-{local-python,http-openapi,mcp,subagent}` |
 | Executor | `aglet-builtin-executor-sequential` |
-| Safety | `aglet-builtin-safety-budget` |
+| Safety | `aglet-builtin-safety-{budget,constitutional}` |
 | Output | `aglet-builtin-output-streaming-text` |
 | Observability | `aglet-builtin-obs-{console,jsonl,otel,langfuse}` |
 | Extensibility | `aglet-builtin-extensibility-hooks` |
@@ -276,9 +276,11 @@ All live on PyPI as `0.1.0a2` (core) / `0.1.0a1` (builtins).
 - **M3 Full pluggability** ✅ — Hooks, subprocess/HTTP runtimes, plugin CLI.
 - **M4 Production** ✅ — Checkpoint/Resume, Reflexion, Tree-of-Thoughts,
   multi-agent, declarative eval harness.
-- **M5 (in progress)** — Marketplace (static index), `planner.workflow` DAG,
-  summary/KG/episodic memory, Constitutional AI safety layer.
-- **M6 (planned)** — Web UI (separate repo), 1.0 protocol freeze.
+- **M5 Marketplace & advanced Techniques** ✅ — static marketplace index,
+  `aglet marketplace` CLI, `planner.workflow` DAG, `memory.summary`,
+  `safety.constitutional`.
+- **M6 (planned)** — KG / episodic memory, DSPy-style prompt optimiser,
+  Web UI (separate repo), 1.0 protocol freeze.
 
 See [CHANGELOG.md](CHANGELOG.md) for release history.
 

@@ -24,6 +24,7 @@ aglet-eval = { workspace = true }
 aglet-builtin-perception-passthrough = { workspace = true }
 aglet-builtin-memory-sliding-window = { workspace = true }
 aglet-builtin-memory-rag = { workspace = true }
+aglet-builtin-memory-summary = { workspace = true }
 aglet-builtin-planner-echo = { workspace = true }
 aglet-builtin-planner-react = { workspace = true }
 aglet-builtin-planner-reflexion = { workspace = true }
@@ -35,6 +36,7 @@ aglet-builtin-tool-mcp = { workspace = true }
 aglet-builtin-tool-subagent = { workspace = true }
 aglet-builtin-executor-sequential = { workspace = true }
 aglet-builtin-safety-budget = { workspace = true }
+aglet-builtin-safety-constitutional = { workspace = true }
 aglet-builtin-output-streaming-text = { workspace = true }
 aglet-builtin-obs-console = { workspace = true }
 aglet-builtin-obs-jsonl = { workspace = true }
@@ -57,6 +59,7 @@ dev = [
     "aglet-builtin-perception-passthrough",
     "aglet-builtin-memory-sliding-window",
     "aglet-builtin-memory-rag",
+    "aglet-builtin-memory-summary",
     "aglet-builtin-planner-echo",
     "aglet-builtin-planner-react",
     "aglet-builtin-planner-reflexion",
@@ -68,6 +71,7 @@ dev = [
     "aglet-builtin-tool-subagent",
     "aglet-builtin-executor-sequential",
     "aglet-builtin-safety-budget",
+    "aglet-builtin-safety-constitutional",
     "aglet-builtin-output-streaming-text",
     "aglet-builtin-obs-console",
     "aglet-builtin-obs-jsonl",

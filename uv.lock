@@ -9,6 +9,7 @@ members = [
     "aglet-builtin-extensibility-hooks",
     "aglet-builtin-memory-rag",
     "aglet-builtin-memory-sliding-window",
+    "aglet-builtin-memory-summary",
     "aglet-builtin-model-litellm",
     "aglet-builtin-model-mock",
     "aglet-builtin-model-openai",
@@ -24,6 +25,7 @@ members = [
     "aglet-builtin-planner-tot",
     "aglet-builtin-planner-workflow",
     "aglet-builtin-safety-budget",
+    "aglet-builtin-safety-constitutional",
     "aglet-builtin-tool-http-openapi",
     "aglet-builtin-tool-local-python",
     "aglet-builtin-tool-mcp",
@@ -99,6 +101,17 @@ requires-dist = [
 name = "aglet-builtin-memory-sliding-window"
 version = "0.1.0a1"
 source = { editable = "packages/aglet-builtin/memory-sliding-window" }
+dependencies = [
+    { name = "aglet" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
+
+[[package]]
+name = "aglet-builtin-memory-summary"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/memory-summary" }
 dependencies = [
     { name = "aglet" },
 ]
@@ -292,6 +305,17 @@ dependencies = [
 requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
+name = "aglet-builtin-safety-constitutional"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/safety-constitutional" }
+dependencies = [
+    { name = "aglet" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
+
+[[package]]
 name = "aglet-builtin-tool-http-openapi"
 version = "0.1.0a1"
 source = { editable = "packages/aglet-builtin/tool-http-openapi" }
@@ -449,6 +473,7 @@ dev = [
     { name = "aglet-builtin-extensibility-hooks" },
     { name = "aglet-builtin-memory-rag" },
     { name = "aglet-builtin-memory-sliding-window" },
+    { name = "aglet-builtin-memory-summary" },
     { name = "aglet-builtin-model-mock" },
     { name = "aglet-builtin-model-openai" },
     { name = "aglet-builtin-obs-console" },
@@ -462,6 +487,7 @@ dev = [
     { name = "aglet-builtin-planner-tot" },
     { name = "aglet-builtin-planner-workflow" },
     { name = "aglet-builtin-safety-budget" },
+    { name = "aglet-builtin-safety-constitutional" },
     { name = "aglet-builtin-tool-http-openapi" },
     { name = "aglet-builtin-tool-local-python" },
     { name = "aglet-builtin-tool-mcp" },
@@ -491,6 +517,7 @@ dev = [
     { name = "aglet-builtin-extensibility-hooks", editable = "packages/aglet-builtin/extensibility-hooks" },
     { name = "aglet-builtin-memory-rag", editable = "packages/aglet-builtin/memory-rag" },
     { name = "aglet-builtin-memory-sliding-window", editable = "packages/aglet-builtin/memory-sliding-window" },
+    { name = "aglet-builtin-memory-summary", editable = "packages/aglet-builtin/memory-summary" },
     { name = "aglet-builtin-model-mock", editable = "packages/aglet-builtin/model-mock" },
     { name = "aglet-builtin-model-openai", editable = "packages/aglet-builtin/model-openai" },
     { name = "aglet-builtin-obs-console", editable = "packages/aglet-builtin/obs-console" },
@@ -504,6 +531,7 @@ dev = [
     { name = "aglet-builtin-planner-tot", editable = "packages/aglet-builtin/planner-tot" },
     { name = "aglet-builtin-planner-workflow", editable = "packages/aglet-builtin/planner-workflow" },
     { name = "aglet-builtin-safety-budget", editable = "packages/aglet-builtin/safety-budget" },
+    { name = "aglet-builtin-safety-constitutional", editable = "packages/aglet-builtin/safety-constitutional" },
     { name = "aglet-builtin-tool-http-openapi", editable = "packages/aglet-builtin/tool-http-openapi" },
     { name = "aglet-builtin-tool-local-python", editable = "packages/aglet-builtin/tool-local-python" },
     { name = "aglet-builtin-tool-mcp", editable = "packages/aglet-builtin/tool-mcp" },

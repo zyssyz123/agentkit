@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.1.0a4 — M5 completion (2026-04-22)
+
+Two more brand-new distributions finishing M5's "summary + constitutional"
+roadmap line item:
+
+* **`aglet-builtin-memory-summary 0.1.0a1`** — rolling LLM-summarised
+  conversation memory. When the per-conversation buffer exceeds
+  `trigger_chars` characters, the technique asks an LLM to compress the
+  oldest half into one paragraph and recalls it on every subsequent turn.
+  Pairs naturally with `memory.sliding_window` under `routing: parallel_merge`.
+* **`aglet-builtin-safety-constitutional 0.1.0a1`** — declarative principles
+  + an LLM judge enforcing them on `pre_check` / `post_check`. Returns
+  `PASS` or `BLOCK: <reason>`; block raises
+  `ConstitutionalViolationError` which the Runtime converts to a
+  `run.failed` event with the reason preserved.
+
+Marketplace index updated to cover both.
+
 ## 0.1.0a3 — M5 release (2026-04-22)
 
 Two packages republished, one brand-new distribution published:
