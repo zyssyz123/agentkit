@@ -560,21 +560,14 @@ DEFAULT_MARKETPLACE_URL = (
 
 
 def _fetch_marketplace(url: str) -> dict:
-    """Fetch the marketplace JSON. Uses httpx if available, else urllib stdlib."""
+    """Fetch the marketplace JSON via stdlib so we don't take a hard dep on a
+    particular httpx version."""
     import json
+    from urllib.request import Request, urlopen
 
-    try:
-        import httpx
-
-        resp = httpx.get(url, timeout=15.0)
-        resp.raise_for_status()
-        return resp.json()
-    except ImportError:
-        from urllib.request import Request, urlopen
-
-        req = Request(url, headers={"User-Agent": "aglet-cli"})
-        with urlopen(req, timeout=15.0) as r:  # noqa: S310 — we control the URL
-            return json.loads(r.read().decode())
+    req = Request(url, headers={"User-Agent": "aglet-cli"})
+    with urlopen(req, timeout=15.0) as r:  # noqa: S310 — URL is user-provided or our default
+        return json.loads(r.read().decode())
 
 
 @marketplace_app.command("list")

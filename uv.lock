@@ -345,7 +345,7 @@ requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
 name = "aglet-cli"
-version = "0.1.0a2"
+version = "0.1.0a3"
 source = { editable = "packages/aglet-cli" }
 dependencies = [
     { name = "aglet" },

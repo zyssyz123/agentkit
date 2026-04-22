@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.1.0a3 — M5 release (2026-04-22)
+
+Two packages republished, one brand-new distribution published:
+
+* **`aglet-cli 0.1.0a3`** — adds the `aglet marketplace` subcommand group
+  (`list` / `search [--element]` / `install`) backed by a static index at
+  `docs/marketplace.json`. Install pathway still shells out to
+  `pip install --pre` so any PyPI name works even if not curated.
+  Fixes a subtle `httpx.get(timeout=...)` incompatibility against httpx
+  1.0.dev (switched the marketplace fetcher to stdlib `urllib`).
+* **`aglet-builtin-planner-workflow 0.1.0a1`** (new) — declarative-DAG planner
+  that walks a fixed node graph of tool calls instead of letting an LLM
+  decide. Emits the same PLANNER_ACTION / PLANNER_FINAL events as any other
+  planner, so it plugs into `executor.sequential` / Hooks / observability
+  without any change. Supports `{input}` and `{nodes.<id>[.<field>]}`
+  template substitution; explicit `edges:` trigger topo-sort with cycle
+  detection.
+
+Non-packaged additions:
+
+* README rewritten as a 5-minute tutorial, with a 2 MB 1200×720 demo gif
+  rendered from `docs/media/demo.tape` via [VHS](https://github.com/charmbracelet/vhs).
+* Launch blog + Twitter thread + community-submission templates under
+  `docs/blog/`.
+
 ## 0.1.0a2 (2026-04-22)
 
 ### `aglet` core only
