@@ -28,6 +28,7 @@ aglet-builtin-planner-echo = { workspace = true }
 aglet-builtin-planner-react = { workspace = true }
 aglet-builtin-planner-reflexion = { workspace = true }
 aglet-builtin-planner-tot = { workspace = true }
+aglet-builtin-planner-workflow = { workspace = true }
 aglet-builtin-tool-local-python = { workspace = true }
 aglet-builtin-tool-http-openapi = { workspace = true }
 aglet-builtin-tool-mcp = { workspace = true }
@@ -60,6 +61,7 @@ dev = [
     "aglet-builtin-planner-react",
     "aglet-builtin-planner-reflexion",
     "aglet-builtin-planner-tot",
+    "aglet-builtin-planner-workflow",
     "aglet-builtin-tool-local-python",
     "aglet-builtin-tool-http-openapi",
     "aglet-builtin-tool-mcp",

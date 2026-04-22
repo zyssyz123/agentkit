@@ -3,18 +3,14 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "aglet-cli"
-version = "0.1.0a2"
-description = "Aglet command-line interface (init / run / elements / techniques)."
+name = "aglet-builtin-planner-workflow"
 authors = [{ name = "The Aglet Contributors" }]
 license = "Apache-2.0"
 readme = "README.md"
+version = "0.1.0a1"
+description = "Aglet declarative-DAG planner: walk a fixed node graph of tool calls instead of letting an LLM decide."
 requires-python = ">=3.11"
-dependencies = [
-    "aglet>=0.1.0a1",
-    "typer>=0.12",
-    "rich>=13.7",
-]
+dependencies = ["aglet>=0.1.0a1"]
 
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -27,8 +23,8 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
-[project.scripts]
-aglet = "aglet_cli.main:app"
+[project.entry-points."aglet.techniques"]
+"planner.workflow" = "aglet_builtin_planner_workflow:WorkflowPlanner"
 
 [project.urls]
 Homepage = "https://github.com/zyssyz123/agentkit"
@@ -36,4 +32,4 @@ Repository = "https://github.com/zyssyz123/agentkit"
 Issues = "https://github.com/zyssyz123/agentkit/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/aglet_cli"]
+packages = ["src/aglet_builtin_planner_workflow"]

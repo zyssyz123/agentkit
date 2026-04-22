@@ -22,6 +22,7 @@ members = [
     "aglet-builtin-planner-react",
     "aglet-builtin-planner-reflexion",
     "aglet-builtin-planner-tot",
+    "aglet-builtin-planner-workflow",
     "aglet-builtin-safety-budget",
     "aglet-builtin-tool-http-openapi",
     "aglet-builtin-tool-local-python",
@@ -269,6 +270,17 @@ dependencies = [
 requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
+name = "aglet-builtin-planner-workflow"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/planner-workflow" }
+dependencies = [
+    { name = "aglet" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
+
+[[package]]
 name = "aglet-builtin-safety-budget"
 version = "0.1.0a1"
 source = { editable = "packages/aglet-builtin/safety-budget" }
@@ -333,7 +345,7 @@ requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
 name = "aglet-cli"
-version = "0.1.0a1"
+version = "0.1.0a2"
 source = { editable = "packages/aglet-cli" }
 dependencies = [
     { name = "aglet" },
@@ -448,6 +460,7 @@ dev = [
     { name = "aglet-builtin-planner-react" },
     { name = "aglet-builtin-planner-reflexion" },
     { name = "aglet-builtin-planner-tot" },
+    { name = "aglet-builtin-planner-workflow" },
     { name = "aglet-builtin-safety-budget" },
     { name = "aglet-builtin-tool-http-openapi" },
     { name = "aglet-builtin-tool-local-python" },
@@ -489,6 +502,7 @@ dev = [
     { name = "aglet-builtin-planner-react", editable = "packages/aglet-builtin/planner-react" },
     { name = "aglet-builtin-planner-reflexion", editable = "packages/aglet-builtin/planner-reflexion" },
     { name = "aglet-builtin-planner-tot", editable = "packages/aglet-builtin/planner-tot" },
+    { name = "aglet-builtin-planner-workflow", editable = "packages/aglet-builtin/planner-workflow" },
     { name = "aglet-builtin-safety-budget", editable = "packages/aglet-builtin/safety-budget" },
     { name = "aglet-builtin-tool-http-openapi", editable = "packages/aglet-builtin/tool-http-openapi" },
     { name = "aglet-builtin-tool-local-python", editable = "packages/aglet-builtin/tool-local-python" },

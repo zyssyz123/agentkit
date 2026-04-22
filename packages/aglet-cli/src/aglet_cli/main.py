@@ -544,5 +544,156 @@ def plugin_remove(
     console.print(f"[green]Uninstalled[/] {name}.")
 
 
+# ---------- marketplace ----------------------------------------------------------------------
+
+
+marketplace_app = typer.Typer(
+    add_completion=False,
+    no_args_is_help=True,
+    help="Discover and install curated Aglet plugins.",
+)
+app.add_typer(marketplace_app, name="marketplace")
+
+DEFAULT_MARKETPLACE_URL = (
+    "https://raw.githubusercontent.com/zyssyz123/agentkit/main/docs/marketplace.json"
+)
+
+
+def _fetch_marketplace(url: str) -> dict:
+    """Fetch the marketplace JSON. Uses httpx if available, else urllib stdlib."""
+    import json
+
+    try:
+        import httpx
+
+        resp = httpx.get(url, timeout=15.0)
+        resp.raise_for_status()
+        return resp.json()
+    except ImportError:
+        from urllib.request import Request, urlopen
+
+        req = Request(url, headers={"User-Agent": "aglet-cli"})
+        with urlopen(req, timeout=15.0) as r:  # noqa: S310 — we control the URL
+            return json.loads(r.read().decode())
+
+
+@marketplace_app.command("list")
+def marketplace_list(
+    url: Annotated[
+        str, typer.Option("--url", help="Marketplace index URL")
+    ] = DEFAULT_MARKETPLACE_URL,
+) -> None:
+    """Pretty-print every plugin in the marketplace index."""
+    try:
+        data = _fetch_marketplace(url)
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[red]Could not fetch marketplace:[/] {exc}")
+        raise typer.Exit(code=1) from exc
+    plugins = data.get("plugins", [])
+    table = Table(title=f"Aglet marketplace — {len(plugins)} plugins")
+    table.add_column("Package")
+    table.add_column("Element", style="cyan")
+    table.add_column("Kind")
+    table.add_column("Version")
+    table.add_column("Description", overflow="fold")
+    for p in sorted(plugins, key=lambda x: (x.get("element") or "~", x.get("name", ""))):
+        table.add_row(
+            p["name"],
+            p.get("element") or "[dim]—[/]",
+            p.get("kind", "?"),
+            p.get("version", "?"),
+            p.get("description", ""),
+        )
+    console.print(table)
+
+
+@marketplace_app.command("search")
+def marketplace_search(
+    query: Annotated[str, typer.Argument(help="Substring or keyword to filter by")],
+    element: Annotated[
+        Optional[str], typer.Option("--element", "-e", help="Filter by Element kind")
+    ] = None,
+    url: Annotated[str, typer.Option("--url")] = DEFAULT_MARKETPLACE_URL,
+) -> None:
+    """Search the marketplace index by package name, description, or keyword."""
+    try:
+        data = _fetch_marketplace(url)
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[red]Could not fetch marketplace:[/] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    q = query.lower()
+    hits = []
+    for p in data.get("plugins", []):
+        if element and p.get("element") != element:
+            continue
+        haystack = " ".join(
+            [
+                p.get("name", ""),
+                p.get("description", ""),
+                p.get("element") or "",
+                p.get("technique") or "",
+                " ".join(p.get("keywords", [])),
+            ]
+        ).lower()
+        if q in haystack:
+            hits.append(p)
+
+    if not hits:
+        console.print(f"[yellow]No results for {query!r}.[/]")
+        return
+
+    table = Table(title=f"Search results for {query!r}")
+    table.add_column("Package")
+    table.add_column("Element", style="cyan")
+    table.add_column("Description", overflow="fold")
+    for p in hits:
+        table.add_row(p["name"], p.get("element") or "—", p.get("description", ""))
+    console.print(table)
+    console.print(
+        f"\n[dim]Install with[/] [bold]aglet marketplace install <package>[/]"
+    )
+
+
+@marketplace_app.command("install")
+def marketplace_install(
+    name: Annotated[str, typer.Argument(help="Package name from the marketplace")],
+    url: Annotated[str, typer.Option("--url")] = DEFAULT_MARKETPLACE_URL,
+) -> None:
+    """Install a marketplace plugin (shells out to `pip install --pre`)."""
+    try:
+        data = _fetch_marketplace(url)
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[red]Could not fetch marketplace:[/] {exc}")
+        raise typer.Exit(code=1) from exc
+
+    names = {p["name"]: p for p in data.get("plugins", [])}
+    if name not in names:
+        console.print(
+            f"[red]Package {name!r} is not in the marketplace index.[/] "
+            f"To install any PyPI package anyway, use [bold]aglet plugin install {name}[/]."
+        )
+        raise typer.Exit(code=1)
+
+    cmd = [*_pip_command(), "install", "--pre", name]
+    console.print(f"[dim]$ {' '.join(cmd)}[/]")
+    try:
+        subprocess.check_call(cmd)
+    except subprocess.CalledProcessError as exc:
+        console.print(f"[red]install failed (exit {exc.returncode}).[/]")
+        raise typer.Exit(code=exc.returncode) from exc
+
+    registry = get_registry()
+    before = set(registry.technique_factories)
+    registry.discover_entry_points()
+    new = sorted(set(registry.technique_factories) - before)
+    if new:
+        console.print(f"\n[green]Installed[/] [bold]{name}[/]. New techniques:")
+        for n in new:
+            console.print(f"  - {n}")
+    else:
+        console.print(f"\n[green]Installed[/] [bold]{name}[/].")
+
+
 if __name__ == "__main__":
     app()
