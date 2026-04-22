@@ -1,0 +1,48 @@
+schema_version: "1.0"
+name: echo-agent
+description: M1 end-to-end smoke test agent. No external services required.
+
+elements:
+  perception:
+    techniques:
+      - name: passthrough
+
+  memory:
+    techniques:
+      - name: sliding_window
+        config:
+          max_messages: 20
+
+  planner:
+    techniques:
+      - name: echo
+        config:
+          prefix: "Echo: "
+          suffix: ""
+
+  safety:
+    techniques:
+      - name: budget_only
+
+  output:
+    techniques:
+      - name: streaming_text
+        config:
+          chunk_size: 8
+
+  observability:
+    techniques:
+      - name: console
+      - name: jsonl
+        config:
+          directory: .agentkit/runs
+
+budget:
+  max_steps: 5
+  max_tokens: 5000
+  max_seconds: 30
+  max_cost_usd: 0.01
+
+store:
+  type: jsonl
+  directory: .agentkit/runs

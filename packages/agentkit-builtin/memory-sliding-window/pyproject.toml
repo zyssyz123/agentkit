@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentkit-builtin-memory-sliding-window"
+version = "0.1.0"
+description = "AgentKit built-in memory technique: per-conversation sliding-window over Message history."
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["agentkit>=0.1.0"]
+
+[project.entry-points."agentkit.techniques"]
+"memory.sliding_window" = "agentkit_builtin_memory_sliding_window:SlidingWindowMemory"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentkit_builtin_memory_sliding_window"]

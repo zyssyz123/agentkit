@@ -1,0 +1,56 @@
+[project]
+name = "agentkit-workspace"
+version = "0.1.0"
+description = "AgentKit monorepo workspace root (not published)."
+requires-python = ">=3.11"
+
+[tool.uv.workspace]
+members = [
+    "packages/agentkit-core",
+    "packages/agentkit-cli",
+    "packages/agentkit-builtin/*",
+]
+
+[tool.uv.sources]
+agentkit = { workspace = true }
+agentkit-cli = { workspace = true }
+agentkit-builtin-perception-passthrough = { workspace = true }
+agentkit-builtin-memory-sliding-window = { workspace = true }
+agentkit-builtin-planner-echo = { workspace = true }
+agentkit-builtin-tool-local-python = { workspace = true }
+agentkit-builtin-tool-http-openapi = { workspace = true }
+agentkit-builtin-executor-sequential = { workspace = true }
+agentkit-builtin-safety-budget = { workspace = true }
+agentkit-builtin-output-streaming-text = { workspace = true }
+agentkit-builtin-obs-console = { workspace = true }
+agentkit-builtin-obs-jsonl = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "agentkit",
+    "agentkit-cli",
+    "agentkit-builtin-perception-passthrough",
+    "agentkit-builtin-memory-sliding-window",
+    "agentkit-builtin-planner-echo",
+    "agentkit-builtin-tool-local-python",
+    "agentkit-builtin-tool-http-openapi",
+    "agentkit-builtin-executor-sequential",
+    "agentkit-builtin-safety-budget",
+    "agentkit-builtin-output-streaming-text",
+    "agentkit-builtin-obs-console",
+    "agentkit-builtin-obs-jsonl",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.6",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N", "SIM"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
