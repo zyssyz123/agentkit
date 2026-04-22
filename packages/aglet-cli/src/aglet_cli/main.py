@@ -471,6 +471,165 @@ def _pip_command() -> list[str]:
     return [sys.executable, "-m", "pip"]
 
 
+PLUGIN_SCAFFOLD_INIT_PY = '''\
+"""{dist_name} — describe your plugin here."""
+
+from __future__ import annotations
+
+from typing import Any
+{protocol_block}
+
+class {class_name}:
+    """{description}"""
+
+    name = "{technique_name}"
+    element = "{element_name}"
+    version = "0.1.0"
+    capabilities = frozenset()
+
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
+        self._config = config or {{}}
+
+    async def setup(self, ctx) -> None:
+        return None
+
+    async def teardown(self) -> None:
+        return None
+
+    async def health(self):
+        from aglet.protocols import HealthStatus
+        return HealthStatus(healthy=True)
+
+    # TODO: implement your element-specific methods here.
+    # e.g. for element=memory implement async recall(ctx, query) and store(ctx, item);
+    # for element=tool implement async list() and invoke(name, arguments).
+    # See docs/plugin-development.md or examples/third-party-*-element for full templates.
+'''
+
+
+PLUGIN_SCAFFOLD_PYPROJECT = '''\
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "{dist_name}"
+version = "0.1.0"
+description = "{description}"
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["aglet>=0.1.0a4"]
+{elements_block}
+[project.entry-points."aglet.techniques"]
+"{element_name}.{technique_name}" = "{module}:{class_name}"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/{module}"]
+'''
+
+
+@plugin_app.command("new")
+def plugin_new(
+    directory: Annotated[
+        Path,
+        typer.Argument(help="Target directory; created if it does not exist."),
+    ],
+    element: Annotated[
+        str,
+        typer.Option(
+            "--element",
+            "-e",
+            help="Element kind the technique belongs to (e.g. memory, planner, tool).",
+        ),
+    ],
+    technique: Annotated[
+        str,
+        typer.Option(
+            "--technique",
+            "-t",
+            help="Technique name within the element (e.g. summary, react).",
+        ),
+    ],
+    new_element: Annotated[
+        bool,
+        typer.Option(
+            "--new-element",
+            help="Also declare --element as a brand-new Element kind "
+            "(contributes to aglet.elements entry-points group).",
+        ),
+    ] = False,
+) -> None:
+    """Scaffold a new plugin package that contributes a Technique (and optionally
+    a new Element kind) under Aglet's entry-points."""
+    directory.mkdir(parents=True, exist_ok=True)
+    dist_name = directory.name
+    module = dist_name.replace("-", "_")
+    class_name = "".join(part.capitalize() for part in technique.split("_")) + "Technique"
+    description = f"Aglet {technique} technique for the {element} Element."
+
+    src_dir = directory / "src" / module
+    src_dir.mkdir(parents=True, exist_ok=True)
+
+    protocol_block = ""
+    elements_block = ""
+    if new_element:
+        protocol_block = (
+            "\nfrom typing import Protocol, runtime_checkable\n\n"
+            "@runtime_checkable\n"
+            f'class {element.capitalize()}Protocol(Protocol):\n'
+            '    """Marker protocol for the new Element kind."""\n'
+            f'    element_kind: str = "{element}"\n\n'
+            "    # TODO: declare the method(s) every technique under this Element must implement.\n"
+            "    # For example:  async def scan(self, text: str) -> list[dict]: ...\n"
+        )
+        elements_block = (
+            f'\n[project.entry-points."aglet.elements"]\n'
+            f'{element} = "{module}:{element.capitalize()}Protocol"\n'
+        )
+
+    init_py = src_dir / "__init__.py"
+    if init_py.exists():
+        console.print(f"[yellow]{init_py} already exists; leaving untouched.[/]")
+    else:
+        init_py.write_text(
+            PLUGIN_SCAFFOLD_INIT_PY.format(
+                dist_name=dist_name,
+                description=description,
+                class_name=class_name,
+                element_name=element,
+                technique_name=technique,
+                protocol_block=protocol_block,
+            ),
+            encoding="utf-8",
+        )
+        console.print(f"[green]created[/]  {init_py}")
+
+    pyproject = directory / "pyproject.toml"
+    if pyproject.exists():
+        console.print(f"[yellow]{pyproject} already exists; leaving untouched.[/]")
+    else:
+        pyproject.write_text(
+            PLUGIN_SCAFFOLD_PYPROJECT.format(
+                dist_name=dist_name,
+                description=description,
+                element_name=element,
+                technique_name=technique,
+                module=module,
+                class_name=class_name,
+                elements_block=elements_block,
+            ),
+            encoding="utf-8",
+        )
+        console.print(f"[green]created[/]  {pyproject}")
+
+    console.print(
+        f"\nNext:\n"
+        f"  [cyan]cd {directory}[/]\n"
+        f"  [cyan]aglet plugin install .[/]   # installs + auto-discovers\n"
+        f"  [cyan]aglet techniques --element {element}[/]   # should list '{technique}'"
+    )
+
+
 @plugin_app.command("install")
 def plugin_install(
     target: Annotated[
@@ -482,6 +641,14 @@ def plugin_install(
 ) -> None:
     """Install an external Aglet plugin (e.g. ``aglet-builtin-model-litellm``,
     ``./my-plugin``, ``git+https://github.com/user/repo.git``)."""
+    # Capture the TRUE "before" state by forcing a discovery pass BEFORE the
+    # install — otherwise the registry is lazily empty at this point and the
+    # diff after install would report every previously-installed technique as new.
+    registry = get_registry()
+    registry.discover_entry_points()
+    before_techs = set(registry.technique_factories)
+    before_elements = set(registry.elements)
+
     cmd = [*_pip_command(), "install", target]
     console.print(f"[dim]$ {' '.join(cmd)}[/]")
     try:
@@ -490,21 +657,21 @@ def plugin_install(
         console.print(f"[red]install failed (exit {exc.returncode}).[/]")
         raise typer.Exit(code=exc.returncode) from exc
 
-    # Re-discover so the freshly installed entry-points become visible immediately.
-    registry = get_registry()
-    before = set(registry.technique_factories)
     registry.discover_entry_points()
-    new = sorted(set(registry.technique_factories) - before)
-    if new:
-        console.print(
-            f"\n[green]Installed[/] [bold]{target}[/].  Newly registered Techniques:"
-        )
-        for n in new:
-            console.print(f"  - {n}")
+    new_techs = sorted(set(registry.technique_factories) - before_techs)
+    new_elements = sorted(set(registry.elements) - before_elements)
+
+    if new_techs or new_elements:
+        console.print(f"\n[green]Installed[/] [bold]{target}[/]. Newly registered:")
+        for e in new_elements:
+            console.print(f"  + [cyan]element[/] {e}")
+        for t in new_techs:
+            console.print(f"  + [cyan]technique[/] {t}")
     else:
         console.print(
-            f"\n[green]Installed[/] [bold]{target}[/], but no new Techniques registered. "
-            "Did the plugin declare entry-points under 'aglet.techniques' / 'aglet.models' / 'aglet.elements'?"
+            f"\n[green]Installed[/] [bold]{target}[/], but no new Techniques or Elements "
+            "registered. Did the plugin declare entry-points under "
+            "'aglet.techniques' / 'aglet.models' / 'aglet.elements'?"
         )
 
 

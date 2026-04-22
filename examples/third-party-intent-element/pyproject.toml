@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "my-intent-plugin"
+version = "0.1.0"
+description = "Third-party Aglet plugin: a brand-new 'intent' Element + a keyword-based technique."
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["aglet>=0.1.0a4"]
+
+# Two entry-point groups — one declares the new Element, one registers a Technique for it.
+[project.entry-points."aglet.elements"]
+intent = "my_intent_plugin:IntentProtocol"
+
+[project.entry-points."aglet.techniques"]
+"intent.keyword" = "my_intent_plugin:KeywordIntent"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/my_intent_plugin"]

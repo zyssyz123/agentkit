@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.1.0a7 — plugin-author dogfood (2026-04-22)
+
+Walked two real plugin-author scenarios end-to-end:
+
+A. **Brand-new `intent` Element** (third-party-intent-element) — defines its
+   own Protocol, contributes `intent.keyword` technique, wires in via
+   `hooks: after.perception.parse`. Classifies user queries into typed
+   IntentLabels stamped onto `ctx.metadata["intent"]`.
+B. **New Technique `memory.entity`** (third-party-memory-entity) — implements
+   the existing MemoryTechnique contract (recall/store), tracks named
+   entities across conversation turns, runs in `parallel_merge` alongside
+   `memory.sliding_window`.
+
+Both live under `examples/` as copy-paste reference.
+
+Fixes / polish that fell out of the dogfood:
+
+* **`aglet-cli 0.1.0a6`**
+    * New `aglet plugin new <dir> --element X --technique Y [--new-element]`
+      scaffolds a complete pyproject.toml + `src/<pkg>/__init__.py` ready
+      for `aglet plugin install .`. `--new-element` also wires in the
+      second entry-point group for a brand-new Element kind.
+    * `aglet plugin install` now captures the registry state BEFORE running
+      pip, so the "Newly registered" delta reports only the truly new
+      techniques and elements (previously it showed every preexisting
+      technique because the registry was lazily empty on CLI startup).
+
+* **New doc: `docs/plugin-development.md`** — a step-by-step guide for
+  both scenarios (new technique vs new Element), with a comparison table,
+  scaffolder instructions, three bridging strategies for new Elements,
+  and links to the working examples in `examples/`.
+
 ## 0.1.0a6 — config sanity guards (2026-04-22)
 
 A follow-on dogfood session tested what happens when an agent.yaml is

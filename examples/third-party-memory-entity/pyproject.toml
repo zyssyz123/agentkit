@@ -1,0 +1,18 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "my-entity-memory"
+version = "0.1.0"
+description = "Third-party Aglet memory technique — track named entities across a conversation."
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["aglet>=0.1.0a4"]
+
+# No `aglet.elements` group — we're using the EXISTING memory Element.
+[project.entry-points."aglet.techniques"]
+"memory.entity" = "my_entity_memory:EntityMemory"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/my_entity_memory"]
