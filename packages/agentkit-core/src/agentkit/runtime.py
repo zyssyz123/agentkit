@@ -29,6 +29,9 @@ from agentkit.context import (
     RawInput,
 )
 import asyncio
+import uuid
+from datetime import datetime, timezone
+
 from agentkit.events import Event, EventBus, EventType
 from agentkit.hooks import HookCallable, HookManager
 from agentkit.hub import (
@@ -174,6 +177,70 @@ class Runtime:
             ),
             history=prior + (Message(role="user", content=input_text),),
         )
+        async for ev in self._loop(ctx):
+            yield ev
+
+    async def resume(self, run_id: str) -> AsyncIterator[Event]:
+        """Resume a previously-checkpointed run from its last patch.
+
+        The store is consulted for the patch sequence captured under ``run_id``;
+        we rebuild the AgentContext, then re-enter the canonical Loop. If the
+        original run already reached ``run.completed`` we re-emit a
+        ``run.completed`` event without actually re-running anything.
+
+        Notes:
+        * Tool calls already executed are preserved in ctx and re-shown to the
+          planner as past observations — the LLM picks up where it left off.
+        * Budget usage is restored, so resume cannot bypass an already-exhausted
+          quota.
+        """
+        if not await self.store.has_run(run_id):
+            raise KeyError(f"No checkpoint found for run_id={run_id!r}")
+
+        # Detect terminal status from the persisted event log so we can short-circuit.
+        events = await self.store.load_events(run_id)
+        terminal = next(
+            (
+                e
+                for e in events
+                if e.type
+                in (
+                    EventType.RUN_COMPLETED,
+                    EventType.RUN_FAILED,
+                    EventType.RUN_CANCELLED,
+                )
+            ),
+            None,
+        )
+        if terminal is not None:
+            # Replay completion event so the caller sees a fast-path "already done".
+            yield Event(
+                type=terminal.type,
+                element=terminal.element,
+                technique=terminal.technique,
+                payload={
+                    **(terminal.payload if isinstance(terminal.payload, dict) else {}),
+                    "resumed": True,
+                },
+                ts=datetime.now(timezone.utc),
+                span_id=str(uuid.uuid4()),
+            )
+            return
+
+        # Rebuild context from patches.
+        base = AgentContext(
+            run_id=run_id,
+            raw_input=RawInput(),
+            budget=Budget(
+                max_steps=self.config.budget.max_steps,
+                max_tokens=self.config.budget.max_tokens,
+                max_seconds=self.config.budget.max_seconds,
+                max_cost_usd=self.config.budget.max_cost_usd,
+            ),
+        )
+        ctx = await self.store.rebuild(run_id, base)
+        # Re-enter the loop. The planner will see the existing scratchpad / tool_calls
+        # / tool_results and pick up where it left off.
         async for ev in self._loop(ctx):
             yield ev
 

@@ -353,6 +353,86 @@ def doctor(
     console.print("\n[green]All elements / techniques / providers resolve cleanly.[/]")
 
 
+# ---------- resume / runs ---------------------------------------------------------------------
+
+
+@app.command()
+def resume(
+    config_path: Annotated[Path, typer.Argument(help="Path to agent.yaml")],
+    run_id: Annotated[str, typer.Argument(help="run_id to resume from")],
+    quiet: Annotated[bool, typer.Option("--quiet", "-q")] = False,
+) -> None:
+    """Resume a previously-checkpointed run.
+
+    The store is consulted for the patch sequence captured under run_id; the
+    AgentContext is rebuilt and the canonical Loop is re-entered. If the original
+    run already completed, ``run.completed`` is replayed without re-running.
+    """
+    if not config_path.exists():
+        console.print(f"[red]agent.yaml not found:[/] {config_path}")
+        raise typer.Exit(code=1)
+
+    cfg = load_agent_config(config_path)
+    runtime = Runtime.from_config(cfg)
+
+    final_chunks: list[str] = []
+    resumed_completed = False
+
+    async def _drive() -> None:
+        nonlocal resumed_completed
+        async for ev in runtime.resume(run_id):
+            if ev.type == EventType.OUTPUT_CHUNK and isinstance(ev.payload, dict):
+                final_chunks.append(ev.payload.get("text", ""))
+            if ev.type == EventType.RUN_COMPLETED and isinstance(ev.payload, dict):
+                if ev.payload.get("resumed"):
+                    resumed_completed = True
+
+    try:
+        asyncio.run(_drive())
+    except KeyError as exc:
+        console.print(f"[red]{exc}[/]")
+        raise typer.Exit(code=1) from exc
+
+    if quiet:
+        sys.stdout.write("".join(final_chunks))
+        sys.stdout.write("\n")
+        sys.stdout.flush()
+    else:
+        console.rule("[bold]Output (resumed)[/]")
+        if resumed_completed:
+            console.print(
+                "[yellow]Run was already completed; replayed terminal event without re-running.[/]"
+            )
+        console.print("".join(final_chunks))
+        console.rule()
+
+
+@app.command(name="runs")
+def runs(
+    config_path: Annotated[
+        Optional[Path], typer.Argument(help="Path to agent.yaml (used to find the store)")
+    ] = None,
+) -> None:
+    """List run_ids previously checkpointed by an agent's store."""
+    cfg = load_agent_config(config_path) if config_path else None
+    if cfg is None or cfg.store.type != "jsonl":
+        console.print(
+            "[yellow]This command currently lists JSONL stores only. "
+            "Pass an agent.yaml whose `store.type: jsonl`.[/]"
+        )
+        raise typer.Exit(code=1)
+    from agentkit.store import JsonlContextStore
+
+    store = JsonlContextStore(cfg.store.directory)
+
+    run_ids = asyncio.run(store.list_runs())
+    table = Table(title=f"Checkpointed runs in {cfg.store.directory}")
+    table.add_column("run_id")
+    for rid in run_ids:
+        table.add_row(rid)
+    console.print(table)
+
+
 # ---------- plugin install / list / remove ---------------------------------------------------
 
 

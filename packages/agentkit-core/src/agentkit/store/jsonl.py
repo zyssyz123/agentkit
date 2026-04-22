@@ -69,11 +69,55 @@ class JsonlContextStore:
             )
         return out
 
+    async def load_events(self, run_id: str) -> list[Event]:
+        # We persist events as opaque dicts; resume() uses them only for status
+        # detection (e.g. "did the run complete?"). Returning the raw dicts cast
+        # to Event is overkill — return a thin wrapper list.
+        path = self._path(run_id)
+        if not path.exists():
+            return []
+        from agentkit.events import EventType
+
+        out: list[Event] = []
+        for line in path.read_text(encoding="utf-8").splitlines():
+            try:
+                obj = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if obj.get("kind") != "event":
+                continue
+            try:
+                etype = EventType(obj["type"])
+            except (KeyError, ValueError):
+                continue
+            out.append(
+                Event(
+                    type=etype,
+                    element=obj.get("element", ""),
+                    technique=obj.get("technique", ""),
+                    payload=obj.get("payload"),
+                    ts=datetime.fromisoformat(obj["ts"]),
+                    span_id=obj.get("span_id", ""),
+                    parent_span_id=obj.get("parent_span_id"),
+                )
+            )
+        return out
+
     async def rebuild(self, run_id: str, base: AgentContext) -> AgentContext:
         ctx = base
         for patch in await self.load_patches(run_id):
             ctx = patch.apply_to(ctx)
         return ctx
+
+    async def list_runs(self) -> list[str]:
+        if not self.directory.exists():
+            return []
+        return sorted(
+            p.stem for p in self.directory.glob("*.jsonl") if not p.name.endswith(".events.jsonl")
+        )
+
+    async def has_run(self, run_id: str) -> bool:
+        return self._path(run_id).exists()
 
 
 def _append_line(path: Path, line: str) -> None:

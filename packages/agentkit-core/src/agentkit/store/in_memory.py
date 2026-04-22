@@ -22,11 +22,20 @@ class InMemoryContextStore:
     async def load_patches(self, run_id: str) -> list[ContextPatch]:
         return list(self._patches[run_id])
 
+    async def load_events(self, run_id: str) -> list[Event]:
+        return list(self._events[run_id])
+
     async def rebuild(self, run_id: str, base: AgentContext) -> AgentContext:
         ctx = base
         for patch in self._patches[run_id]:
             ctx = patch.apply_to(ctx)
         return ctx
+
+    async def list_runs(self) -> list[str]:
+        return sorted(self._patches.keys() | self._events.keys())
+
+    async def has_run(self, run_id: str) -> bool:
+        return run_id in self._patches or run_id in self._events
 
     def events(self, run_id: str) -> list[Event]:
         return list(self._events[run_id])

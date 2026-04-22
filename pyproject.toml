@@ -9,6 +9,7 @@ members = [
     "packages/agentkit-core",
     "packages/agentkit-cli",
     "packages/agentkit-server",
+    "packages/agentkit-eval",
     "packages/agentkit-builtin/*",
     "examples/third-party-element-demo",
     "examples/subprocess-plugin-demo",
@@ -19,14 +20,18 @@ members = [
 agentkit = { workspace = true }
 agentkit-cli = { workspace = true }
 agentkit-server = { workspace = true }
+agentkit-eval = { workspace = true }
 agentkit-builtin-perception-passthrough = { workspace = true }
 agentkit-builtin-memory-sliding-window = { workspace = true }
 agentkit-builtin-memory-rag = { workspace = true }
 agentkit-builtin-planner-echo = { workspace = true }
 agentkit-builtin-planner-react = { workspace = true }
+agentkit-builtin-planner-reflexion = { workspace = true }
+agentkit-builtin-planner-tot = { workspace = true }
 agentkit-builtin-tool-local-python = { workspace = true }
 agentkit-builtin-tool-http-openapi = { workspace = true }
 agentkit-builtin-tool-mcp = { workspace = true }
+agentkit-builtin-tool-subagent = { workspace = true }
 agentkit-builtin-executor-sequential = { workspace = true }
 agentkit-builtin-safety-budget = { workspace = true }
 agentkit-builtin-output-streaming-text = { workspace = true }
@@ -47,14 +52,18 @@ dev = [
     "agentkit",
     "agentkit-cli",
     "agentkit-server",
+    "agentkit-eval",
     "agentkit-builtin-perception-passthrough",
     "agentkit-builtin-memory-sliding-window",
     "agentkit-builtin-memory-rag",
     "agentkit-builtin-planner-echo",
     "agentkit-builtin-planner-react",
+    "agentkit-builtin-planner-reflexion",
+    "agentkit-builtin-planner-tot",
     "agentkit-builtin-tool-local-python",
     "agentkit-builtin-tool-http-openapi",
     "agentkit-builtin-tool-mcp",
+    "agentkit-builtin-tool-subagent",
     "agentkit-builtin-executor-sequential",
     "agentkit-builtin-safety-budget",
     "agentkit-builtin-output-streaming-text",

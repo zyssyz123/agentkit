@@ -20,14 +20,18 @@ members = [
     "agentkit-builtin-perception-passthrough",
     "agentkit-builtin-planner-echo",
     "agentkit-builtin-planner-react",
+    "agentkit-builtin-planner-reflexion",
+    "agentkit-builtin-planner-tot",
     "agentkit-builtin-safety-budget",
     "agentkit-builtin-tool-http-openapi",
     "agentkit-builtin-tool-local-python",
     "agentkit-builtin-tool-mcp",
+    "agentkit-builtin-tool-subagent",
     "agentkit-cli",
     "agentkit-demo-compliance",
     "agentkit-demo-http-tool",
     "agentkit-demo-subprocess-tool",
+    "agentkit-eval",
     "agentkit-server",
     "agentkit-workspace",
 ]
@@ -241,6 +245,28 @@ dependencies = [
 requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
 
 [[package]]
+name = "agentkit-builtin-planner-reflexion"
+version = "0.1.0"
+source = { editable = "packages/agentkit-builtin/planner-reflexion" }
+dependencies = [
+    { name = "agentkit" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+
+[[package]]
+name = "agentkit-builtin-planner-tot"
+version = "0.1.0"
+source = { editable = "packages/agentkit-builtin/planner-tot" }
+dependencies = [
+    { name = "agentkit" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+
+[[package]]
 name = "agentkit-builtin-safety-budget"
 version = "0.1.0"
 source = { editable = "packages/agentkit-builtin/safety-budget" }
@@ -291,6 +317,17 @@ requires-dist = [
     { name = "agentkit", editable = "packages/agentkit-core" },
     { name = "mcp", specifier = ">=1.0" },
 ]
+
+[[package]]
+name = "agentkit-builtin-tool-subagent"
+version = "0.1.0"
+source = { editable = "packages/agentkit-builtin/tool-subagent" }
+dependencies = [
+    { name = "agentkit" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
 
 [[package]]
 name = "agentkit-cli"
@@ -349,6 +386,25 @@ dependencies = [
 requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
 
 [[package]]
+name = "agentkit-eval"
+version = "0.1.0"
+source = { editable = "packages/agentkit-eval" }
+dependencies = [
+    { name = "agentkit" },
+    { name = "pyyaml" },
+    { name = "rich" },
+    { name = "typer" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "pyyaml", specifier = ">=6.0" },
+    { name = "rich", specifier = ">=13.7" },
+    { name = "typer", specifier = ">=0.12" },
+]
+
+[[package]]
 name = "agentkit-server"
 version = "0.1.0"
 source = { editable = "packages/agentkit-server" }
@@ -388,14 +444,18 @@ dev = [
     { name = "agentkit-builtin-perception-passthrough" },
     { name = "agentkit-builtin-planner-echo" },
     { name = "agentkit-builtin-planner-react" },
+    { name = "agentkit-builtin-planner-reflexion" },
+    { name = "agentkit-builtin-planner-tot" },
     { name = "agentkit-builtin-safety-budget" },
     { name = "agentkit-builtin-tool-http-openapi" },
     { name = "agentkit-builtin-tool-local-python" },
     { name = "agentkit-builtin-tool-mcp" },
+    { name = "agentkit-builtin-tool-subagent" },
     { name = "agentkit-cli" },
     { name = "agentkit-demo-compliance" },
     { name = "agentkit-demo-http-tool" },
     { name = "agentkit-demo-subprocess-tool" },
+    { name = "agentkit-eval" },
     { name = "agentkit-server" },
     { name = "httpx" },
     { name = "pytest" },
@@ -425,14 +485,18 @@ dev = [
     { name = "agentkit-builtin-perception-passthrough", editable = "packages/agentkit-builtin/perception-passthrough" },
     { name = "agentkit-builtin-planner-echo", editable = "packages/agentkit-builtin/planner-echo" },
     { name = "agentkit-builtin-planner-react", editable = "packages/agentkit-builtin/planner-react" },
+    { name = "agentkit-builtin-planner-reflexion", editable = "packages/agentkit-builtin/planner-reflexion" },
+    { name = "agentkit-builtin-planner-tot", editable = "packages/agentkit-builtin/planner-tot" },
     { name = "agentkit-builtin-safety-budget", editable = "packages/agentkit-builtin/safety-budget" },
     { name = "agentkit-builtin-tool-http-openapi", editable = "packages/agentkit-builtin/tool-http-openapi" },
     { name = "agentkit-builtin-tool-local-python", editable = "packages/agentkit-builtin/tool-local-python" },
     { name = "agentkit-builtin-tool-mcp", editable = "packages/agentkit-builtin/tool-mcp" },
+    { name = "agentkit-builtin-tool-subagent", editable = "packages/agentkit-builtin/tool-subagent" },
     { name = "agentkit-cli", editable = "packages/agentkit-cli" },
     { name = "agentkit-demo-compliance", editable = "examples/third-party-element-demo" },
     { name = "agentkit-demo-http-tool", editable = "examples/http-plugin-demo" },
     { name = "agentkit-demo-subprocess-tool", editable = "examples/subprocess-plugin-demo" },
+    { name = "agentkit-eval", editable = "packages/agentkit-eval" },
     { name = "agentkit-server", editable = "packages/agentkit-server" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "pytest", specifier = ">=8.0" },

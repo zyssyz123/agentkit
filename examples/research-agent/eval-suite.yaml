@@ -1,0 +1,24 @@
+agent: ./agent.yaml
+
+cases:
+  - name: knows-its-own-pitch
+    input: "What is AgentKit in one sentence?"
+    expected_contains:
+      - "swappable"
+    forbidden:
+      - "real estate"   # earlier RAG-less version hallucinated this
+    max_seconds: 30
+    max_steps: 5
+
+  - name: lists-elements
+    input: "How many core elements does AgentKit organize agent design into?"
+    expected_regex: "9|nine"
+    max_seconds: 30
+    max_steps: 5
+
+  - name: knows-third-party-extensibility
+    input: "Can third parties contribute new Element kinds beyond the built-in ones?"
+    expected_contains:
+      - "third-party"
+    max_seconds: 30
+    max_steps: 5
