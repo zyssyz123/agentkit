@@ -15,7 +15,11 @@ No other packages republished — they continue to pin `aglet>=0.1.0a1` which
 
 ## 0.1.0a1 (2026-04-22)
 
-First public alpha. 26 PyPI distributions published from a single monorepo:
+First public alpha. **All 26 PyPI distributions** published from a single monorepo
+(20 in the first publish wave; the remaining 6 — `aglet-cli`, `aglet-server`,
+`aglet-eval`, and `aglet-builtin-tool-{local-python,mcp,subagent}` — landed in
+a second wave once PyPI's per-account "too many new projects per hour" guard
+expired ~30 minutes later):
 
 | Tier | Packages |
 | --- | --- |
@@ -30,11 +34,6 @@ First public alpha. 26 PyPI distributions published from a single monorepo:
 | Observability | `aglet-builtin-obs-{console,jsonl,otel,langfuse}` |
 | Extensibility | `aglet-builtin-extensibility-hooks` |
 | Model providers | `aglet-builtin-model-{openai,litellm,mock}` |
-
-20 of 26 published in the first publish round. The remaining 6 (`aglet-cli`,
-`aglet-server`, `aglet-eval`, `aglet-builtin-tool-{local-python,mcp,subagent}`)
-were rate-limited by PyPI's anti-spam "too many new projects per account per
-hour" guard and will land on the next publish window.
 
 ### What's in 0.1.0a1
 
