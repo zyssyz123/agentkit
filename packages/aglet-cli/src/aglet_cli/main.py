@@ -136,6 +136,14 @@ def run(
     quiet: Annotated[
         bool, typer.Option("--quiet", "-q", help="Suppress event prints from Observability")
     ] = False,
+    show_ctx: Annotated[
+        bool,
+        typer.Option(
+            "--show-ctx",
+            help="After the run, print the final AgentContext's metadata, plan, "
+            "recalled memory, tool round-trips and scratchpad.",
+        ),
+    ] = False,
 ) -> None:
     """Run a single turn against an agent.yaml file."""
     if not config_path.exists():
@@ -171,6 +179,9 @@ def run(
         console.rule()
         if run_id_holder["id"]:
             console.print(f"[dim]Run id: {run_id_holder['id']}[/]")
+
+    if show_ctx and run_id_holder["id"]:
+        asyncio.run(_print_ctx_snapshot(runtime, run_id_holder["id"], input_text))
 
 
 # ---------- chat (multi-turn REPL) -----------------------------------------------------------
@@ -373,6 +384,181 @@ def doctor(
     console.print("\n[green]All elements / techniques / providers resolve cleanly.[/]")
 
 
+# ---------- ctx inspection helpers -----------------------------------------------------------
+
+
+def _short(value: object, limit: int = 160) -> str:
+    import json as _json
+
+    if value is None:
+        return "None"
+    if isinstance(value, str):
+        return value if len(value) <= limit else value[:limit - 3] + "..."
+    try:
+        s = _json.dumps(value, default=str, ensure_ascii=False)
+    except Exception:  # noqa: BLE001
+        s = repr(value)
+    return s if len(s) <= limit else s[:limit - 3] + "..."
+
+
+async def _rebuild_ctx(runtime, run_id: str, input_text: str):
+    """Replay the patch log to get the final AgentContext for a run."""
+    from aglet.budget import Budget
+    from aglet.context import AgentContext, RawInput
+
+    base = AgentContext(run_id=run_id, raw_input=RawInput(text=input_text), budget=Budget())
+    return await runtime.store.rebuild(run_id, base)
+
+
+def _get(obj: object, key: str, default=None):
+    """Access ``obj.key`` if it's a dataclass instance or ``obj[key]`` if it's a dict.
+
+    The JSONL store serialises dataclass values as plain dicts, so after a
+    ``rebuild()`` many fields come back as dicts rather than the original types.
+    This helper lets the snapshot printer work in both cases without forcing a
+    full revivify layer on the store.
+    """
+    if obj is None:
+        return default
+    if isinstance(obj, dict):
+        return obj.get(key, default)
+    return getattr(obj, key, default)
+
+
+async def _print_ctx_snapshot(runtime, run_id: str, input_text: str = "") -> None:
+    from rich.tree import Tree
+
+    ctx = await _rebuild_ctx(runtime, run_id, input_text)
+
+    tree = Tree(f"[bold cyan]AgentContext[/] [dim]run_id={run_id}[/]")
+
+    tree.add(f"[bold]raw_input[/]         {_short(ctx.raw_input.text)}")
+    tree.add(f"[bold]parsed_input[/]      {_short(_get(ctx.parsed_input, 'query'))}")
+    tree.add(f"[bold]plan.final[/]        {_short(_get(ctx.plan, 'final_answer'))}")
+
+    if ctx.recalled_memory:
+        mem = tree.add(f"[bold]recalled_memory[/]    ({len(ctx.recalled_memory)} items)")
+        for item in ctx.recalled_memory:
+            src = _get(item, "source", "")
+            content = _get(item, "content", "")
+            mem.add(f"[dim]{src}[/]  {_short(content, 120)}")
+    if ctx.scratchpad:
+        sp = tree.add(f"[bold]scratchpad[/]         ({len(ctx.scratchpad)} thoughts)")
+        for t in ctx.scratchpad:
+            tech = _get(t, "technique", "")
+            content = _get(t, "content", "")
+            sp.add(f"[dim]{tech}[/]  {_short(content, 120)}")
+    if ctx.tool_calls or ctx.tool_results:
+        tc = tree.add(
+            f"[bold]tool_round_trips[/]   "
+            f"({len(ctx.tool_calls)} call, {len(ctx.tool_results)} result)"
+        )
+        results_by_id = {
+            _get(r, "call_id", ""): r for r in ctx.tool_results if _get(r, "call_id")
+        }
+        for call in ctx.tool_calls:
+            name = _get(call, "name", "?")
+            args = _get(call, "arguments", {})
+            node = tc.add(f"[magenta]{name}[/]({_short(args, 80)})")
+            result = results_by_id.get(_get(call, "id", ""))
+            if result is not None:
+                err = _get(result, "error")
+                status = "[red]err[/]" if err else "[green]ok[/]"
+                payload = _get(result, "output") if not err else err
+                node.add(f"{status}  {_short(payload, 120)}")
+    if ctx.metadata:
+        meta = tree.add(f"[bold]metadata[/]          ({len(ctx.metadata)} keys)")
+        for key, value in ctx.metadata.items():
+            meta.add(f"[yellow]{key}[/]: {_short(value)}")
+
+    b = ctx.budget
+    max_steps = _get(b, "max_steps", 0)
+    used_steps = _get(b, "used_steps", 0)
+    max_tokens = _get(b, "max_tokens", 0)
+    used_tokens = _get(b, "used_tokens", 0)
+    max_cost = _get(b, "max_cost_usd", 0.0)
+    used_cost = _get(b, "used_cost_usd", 0.0)
+    tree.add(
+        f"[bold]budget[/]            steps={used_steps}/{max_steps}  "
+        f"tokens={used_tokens}/{max_tokens}  "
+        f"cost=${float(used_cost):.4f}/${float(max_cost):.4f}"
+    )
+
+    console.rule("[bold]AgentContext snapshot[/]")
+    console.print(tree)
+
+
+async def _print_patch_log(runtime, run_id: str) -> None:
+    patches = await runtime.store.load_patches(run_id)
+    if not patches:
+        console.print(f"[yellow]No patches stored for run_id={run_id}[/]")
+        return
+
+    table = Table(title=f"Patch log for {run_id}  ({len(patches)} patches)")
+    table.add_column("#", style="dim", width=3)
+    table.add_column("ts", style="dim")
+    table.add_column("element", style="cyan")
+    table.add_column("technique", style="magenta")
+    table.add_column("keys changed", overflow="fold")
+    for i, p in enumerate(patches):
+        ts = p.ts.strftime("%H:%M:%S.%f")[:-3]
+        keys = ", ".join(p.changes.keys()) or "(empty)"
+        table.add_row(str(i), ts, p.source_element or "—", p.source_technique or "—", keys)
+    console.print(table)
+
+
+# ---------- inspect -------------------------------------------------------------------------
+
+
+@app.command()
+def inspect(
+    run_id: Annotated[str, typer.Argument(help="run_id to inspect")],
+    config_path: Annotated[
+        Path,
+        typer.Option(
+            "--config",
+            "-c",
+            help="agent.yaml the run belongs to (used to locate the store).",
+        ),
+    ],
+    patches: Annotated[
+        bool,
+        typer.Option(
+            "--patches",
+            help="Additionally list every ContextPatch that produced the final state.",
+        ),
+    ] = False,
+) -> None:
+    """Rebuild a past run's AgentContext from its store and print it.
+
+    Useful for debugging: after `aglet run`, pass the printed run_id here to
+    see every patch that went into the final context, plus the current
+    metadata, scratchpad, tool round-trips, and budget usage.
+    """
+    if not config_path.exists():
+        console.print(f"[red]agent.yaml not found:[/] {config_path}")
+        raise typer.Exit(code=1)
+
+    cfg = load_agent_config(config_path)
+    runtime = Runtime.from_config(cfg)
+
+    async def _go() -> None:
+        if not await runtime.store.has_run(run_id):
+            console.print(f"[red]No checkpoint for run_id={run_id}[/]")
+            raise typer.Exit(code=1)
+        await _print_ctx_snapshot(runtime, run_id)
+        if patches:
+            await _print_patch_log(runtime, run_id)
+
+    try:
+        asyncio.run(_go())
+    except typer.Exit:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        console.print(f"[red]inspect failed:[/] {exc}")
+        raise typer.Exit(code=1) from exc
+
+
 # ---------- resume / runs ---------------------------------------------------------------------
 
 
@@ -464,11 +650,23 @@ plugin_app = typer.Typer(
 app.add_typer(plugin_app, name="plugin")
 
 
-def _pip_command() -> list[str]:
-    """Return a pip-equivalent command, preferring uv pip when available."""
+def _pip_install_prefix() -> list[str]:
+    """Return a command prefix that installs into the Python running aglet.
+
+    Critically passes ``--python sys.executable`` so that installs never leak
+    into a neighbouring conda/system env — ``uv pip install`` otherwise picks
+    whatever Python its heuristics find first, which has bitten users who
+    launched ``aglet`` from a venv without activating it.
+    """
     if shutil.which("uv"):
-        return ["uv", "pip"]
-    return [sys.executable, "-m", "pip"]
+        return ["uv", "pip", "install", "--python", sys.executable]
+    return [sys.executable, "-m", "pip", "install"]
+
+
+def _pip_uninstall_prefix() -> list[str]:
+    if shutil.which("uv"):
+        return ["uv", "pip", "uninstall", "--python", sys.executable]
+    return [sys.executable, "-m", "pip", "uninstall", "-y"]
 
 
 PLUGIN_SCAFFOLD_INIT_PY = '''\
@@ -649,7 +847,7 @@ def plugin_install(
     before_techs = set(registry.technique_factories)
     before_elements = set(registry.elements)
 
-    cmd = [*_pip_command(), "install", target]
+    cmd = [*_pip_install_prefix(), target]
     console.print(f"[dim]$ {' '.join(cmd)}[/]")
     try:
         subprocess.check_call(cmd)
@@ -716,12 +914,7 @@ def plugin_remove(
     name: Annotated[str, typer.Argument(help="PyPI distribution name to uninstall")],
 ) -> None:
     """Uninstall an Aglet plugin distribution."""
-    cmd = [*_pip_command(), "uninstall", "-y", name] if "uv" in _pip_command()[0] else [
-        *_pip_command(),
-        "uninstall",
-        "-y",
-        name,
-    ]
+    cmd = [*_pip_uninstall_prefix(), name]
     console.print(f"[dim]$ {' '.join(cmd)}[/]")
     try:
         subprocess.check_call(cmd)
@@ -855,7 +1048,7 @@ def marketplace_install(
         )
         raise typer.Exit(code=1)
 
-    cmd = [*_pip_command(), "install", "--pre", name]
+    cmd = [*_pip_install_prefix(), "--pre", name]
     console.print(f"[dim]$ {' '.join(cmd)}[/]")
     try:
         subprocess.check_call(cmd)

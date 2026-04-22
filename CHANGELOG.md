@@ -1,5 +1,45 @@
 # Changelog
 
+## 0.1.0a8 — runtime ctx inspection + plugin install sandboxing (2026-04-22)
+
+Closes the last open dogfood finding — at runtime, users had no way to see
+what patches produced which `ctx.metadata` / `scratchpad` / `tool_results`
+values. Plus fixed a silently-dangerous bug in `aglet plugin install`.
+
+**aglet-cli 0.1.0a7** ships:
+
+* New `--show-ctx` flag on `aglet run`. After the run completes it prints a
+  `rich`-rendered tree of the final AgentContext: raw / parsed input, plan
+  final answer, recalled memory items (grouped by source technique),
+  scratchpad thoughts (by author), tool round-trips (calls paired with
+  results), metadata keys, and budget usage.
+
+* New top-level `aglet inspect <run_id> --config agent.yaml` command.
+  Rebuilds ANY past run's AgentContext from its store — the same tree —
+  without re-running the agent. Pass `--patches` to also see the full
+  change log (which element / technique produced each patch, timestamped
+  to milliseconds, plus the field names changed). Makes "why did memory
+  end up with that value" a one-command debug, not a Python-scripting
+  exercise.
+
+* **Bug fix (subtle!)**: `aglet plugin install` used the bare
+  `uv pip install` form without `--python sys.executable`. When the user
+  invoked `aglet` via its venv binary without activating the venv, `uv pip`
+  picked a nearby conda env instead — the install silently went to the
+  wrong interpreter and the freshly "installed" plugin was unreachable.
+  Now every pip subcommand is pinned to the Python that's running `aglet`
+  itself (`_pip_install_prefix` / `_pip_uninstall_prefix`).
+
+Internal helpers introduced:
+
+* `aglet_cli.main._rebuild_ctx(runtime, run_id, input_text)` – returns the
+  replayed AgentContext for a run id.
+* `aglet_cli.main._print_ctx_snapshot(runtime, run_id)` – rich tree printer,
+  robust against dataclass-vs-dict fields (the JSONL store deserialises
+  back to dicts, so the printer uses a `_get()` helper that accepts both).
+* `aglet_cli.main._print_patch_log(runtime, run_id)` – timestamped patch
+  table.
+
 ## 0.1.0a7 — plugin-author dogfood (2026-04-22)
 
 Walked two real plugin-author scenarios end-to-end:
