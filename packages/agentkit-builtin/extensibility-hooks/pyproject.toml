@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentkit-builtin-extensibility-hooks"
+version = "0.1.0"
+description = "AgentKit built-in Extensibility Techniques: cost tracker, audit log, tool gate."
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["agentkit>=0.1.0"]
+
+[project.entry-points."agentkit.techniques"]
+"extensibility.tool_audit"   = "agentkit_builtin_extensibility_hooks:ToolAuditHook"
+"extensibility.cost_tracker" = "agentkit_builtin_extensibility_hooks:CostTrackerHook"
+"extensibility.tool_gate"    = "agentkit_builtin_extensibility_hooks:ToolGateHook"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentkit_builtin_extensibility_hooks"]

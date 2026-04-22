@@ -26,6 +26,7 @@ from agentkit.context import (
     ToolSpec,
 )
 from agentkit.events import Event, EventBus, EventType
+from agentkit.hooks import HookCallable, HookManager
 from agentkit.hub import ElementHost, ElementHub, RoutingStrategy
 from agentkit.loader import InProcessRuntime, PluginLoader
 from agentkit.models import (
@@ -59,6 +60,9 @@ __all__ = [
     "Event",
     "EventBus",
     "EventType",
+    # Hooks
+    "HookCallable",
+    "HookManager",
     # Runtime
     "Runtime",
     "ElementHub",

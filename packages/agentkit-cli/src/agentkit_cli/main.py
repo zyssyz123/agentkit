@@ -3,14 +3,22 @@
 Commands:
   init <dir>                        # scaffold a new agent
   run <agent.yaml> --input "..."    # run one turn locally
+  chat <agent.yaml>                 # interactive multi-turn REPL
   elements                          # list registered Elements
   techniques [--element NAME]       # list registered Techniques
+  doctor [agent.yaml]               # diagnose install + validate config
+  plugin install <pypi|git>         # install an external plugin via uv pip
+  plugin list                       # list installed agentkit plugins
+  plugin remove <pypi-name>         # uninstall a plugin
 """
 
 from __future__ import annotations
 
 import asyncio
+import shutil
+import subprocess
 import sys
+from importlib import metadata as importlib_metadata
 from pathlib import Path
 from typing import Annotated, Optional
 
@@ -343,6 +351,117 @@ def doctor(
         console.print(f"\n[red]{len(problems)} problem(s) found.[/]")
         raise typer.Exit(code=2)
     console.print("\n[green]All elements / techniques / providers resolve cleanly.[/]")
+
+
+# ---------- plugin install / list / remove ---------------------------------------------------
+
+
+plugin_app = typer.Typer(
+    add_completion=False,
+    no_args_is_help=True,
+    help="Install / list / remove external AgentKit plugins (PyPI or git).",
+)
+app.add_typer(plugin_app, name="plugin")
+
+
+def _pip_command() -> list[str]:
+    """Return a pip-equivalent command, preferring uv pip when available."""
+    if shutil.which("uv"):
+        return ["uv", "pip"]
+    return [sys.executable, "-m", "pip"]
+
+
+@plugin_app.command("install")
+def plugin_install(
+    target: Annotated[
+        str,
+        typer.Argument(
+            help="PyPI distribution name, local path, or git+https URL",
+        ),
+    ],
+) -> None:
+    """Install an external AgentKit plugin (e.g. ``agentkit-builtin-model-litellm``,
+    ``./my-plugin``, ``git+https://github.com/user/repo.git``)."""
+    cmd = [*_pip_command(), "install", target]
+    console.print(f"[dim]$ {' '.join(cmd)}[/]")
+    try:
+        subprocess.check_call(cmd)
+    except subprocess.CalledProcessError as exc:
+        console.print(f"[red]install failed (exit {exc.returncode}).[/]")
+        raise typer.Exit(code=exc.returncode) from exc
+
+    # Re-discover so the freshly installed entry-points become visible immediately.
+    registry = get_registry()
+    before = set(registry.technique_factories)
+    registry.discover_entry_points()
+    new = sorted(set(registry.technique_factories) - before)
+    if new:
+        console.print(
+            f"\n[green]Installed[/] [bold]{target}[/].  Newly registered Techniques:"
+        )
+        for n in new:
+            console.print(f"  - {n}")
+    else:
+        console.print(
+            f"\n[green]Installed[/] [bold]{target}[/], but no new Techniques registered. "
+            "Did the plugin declare entry-points under 'agentkit.techniques' / 'agentkit.models' / 'agentkit.elements'?"
+        )
+
+
+@plugin_app.command("list")
+def plugin_list() -> None:
+    """List installed PyPI distributions that publish at least one AgentKit entry-point."""
+    table = Table(title="Installed AgentKit plugins")
+    table.add_column("Distribution")
+    table.add_column("Version")
+    table.add_column("Entry-points contributed")
+
+    rows: dict[str, dict] = {}
+    for group in ("agentkit.techniques", "agentkit.models", "agentkit.elements"):
+        try:
+            eps = importlib_metadata.entry_points(group=group)
+        except TypeError:
+            eps = importlib_metadata.entry_points().get(group, [])  # type: ignore[assignment]
+        for ep in eps:
+            dist = getattr(ep, "dist", None)
+            dist_name = dist.metadata["Name"] if dist is not None else "<unknown>"
+            row = rows.setdefault(
+                dist_name,
+                {
+                    "version": dist.version if dist is not None else "?",
+                    "groups": {},
+                },
+            )
+            row["groups"].setdefault(group, []).append(ep.name)
+
+    for name in sorted(rows):
+        info = rows[name]
+        contributed = []
+        for group, names in sorted(info["groups"].items()):
+            short = group.split(".", 1)[1]
+            contributed.append(f"[cyan]{short}[/]: {', '.join(sorted(names))}")
+        table.add_row(name, info["version"], "\n".join(contributed))
+    console.print(table)
+
+
+@plugin_app.command("remove")
+def plugin_remove(
+    name: Annotated[str, typer.Argument(help="PyPI distribution name to uninstall")],
+) -> None:
+    """Uninstall an AgentKit plugin distribution."""
+    cmd = [*_pip_command(), "uninstall", "-y", name] if "uv" in _pip_command()[0] else [
+        *_pip_command(),
+        "uninstall",
+        "-y",
+        name,
+    ]
+    console.print(f"[dim]$ {' '.join(cmd)}[/]")
+    try:
+        subprocess.check_call(cmd)
+    except subprocess.CalledProcessError as exc:
+        console.print(f"[red]uninstall failed (exit {exc.returncode}).[/]")
+        raise typer.Exit(code=exc.returncode) from exc
+    console.print(f"[green]Uninstalled[/] {name}.")
 
 
 if __name__ == "__main__":

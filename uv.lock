@@ -6,6 +6,7 @@ requires-python = ">=3.11"
 members = [
     "agentkit",
     "agentkit-builtin-executor-sequential",
+    "agentkit-builtin-extensibility-hooks",
     "agentkit-builtin-memory-rag",
     "agentkit-builtin-memory-sliding-window",
     "agentkit-builtin-model-litellm",
@@ -25,6 +26,8 @@ members = [
     "agentkit-builtin-tool-mcp",
     "agentkit-cli",
     "agentkit-demo-compliance",
+    "agentkit-demo-http-tool",
+    "agentkit-demo-subprocess-tool",
     "agentkit-server",
     "agentkit-workspace",
 ]
@@ -50,6 +53,17 @@ requires-dist = [
 name = "agentkit-builtin-executor-sequential"
 version = "0.1.0"
 source = { editable = "packages/agentkit-builtin/executor-sequential" }
+dependencies = [
+    { name = "agentkit" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+
+[[package]]
+name = "agentkit-builtin-extensibility-hooks"
+version = "0.1.0"
+source = { editable = "packages/agentkit-builtin/extensibility-hooks" }
 dependencies = [
     { name = "agentkit" },
 ]
@@ -307,6 +321,34 @@ dependencies = [
 requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
 
 [[package]]
+name = "agentkit-demo-http-tool"
+version = "0.1.0"
+source = { editable = "examples/http-plugin-demo" }
+dependencies = [
+    { name = "agentkit" },
+    { name = "fastapi" },
+    { name = "uvicorn" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "fastapi", specifier = ">=0.115" },
+    { name = "uvicorn", specifier = ">=0.30" },
+]
+
+[[package]]
+name = "agentkit-demo-subprocess-tool"
+version = "0.1.0"
+source = { editable = "examples/subprocess-plugin-demo" }
+dependencies = [
+    { name = "agentkit" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+
+[[package]]
 name = "agentkit-server"
 version = "0.1.0"
 source = { editable = "packages/agentkit-server" }
@@ -334,6 +376,7 @@ source = { virtual = "." }
 dev = [
     { name = "agentkit" },
     { name = "agentkit-builtin-executor-sequential" },
+    { name = "agentkit-builtin-extensibility-hooks" },
     { name = "agentkit-builtin-memory-rag" },
     { name = "agentkit-builtin-memory-sliding-window" },
     { name = "agentkit-builtin-model-mock" },
@@ -351,6 +394,8 @@ dev = [
     { name = "agentkit-builtin-tool-mcp" },
     { name = "agentkit-cli" },
     { name = "agentkit-demo-compliance" },
+    { name = "agentkit-demo-http-tool" },
+    { name = "agentkit-demo-subprocess-tool" },
     { name = "agentkit-server" },
     { name = "httpx" },
     { name = "pytest" },
@@ -368,6 +413,7 @@ heavy = [
 dev = [
     { name = "agentkit", editable = "packages/agentkit-core" },
     { name = "agentkit-builtin-executor-sequential", editable = "packages/agentkit-builtin/executor-sequential" },
+    { name = "agentkit-builtin-extensibility-hooks", editable = "packages/agentkit-builtin/extensibility-hooks" },
     { name = "agentkit-builtin-memory-rag", editable = "packages/agentkit-builtin/memory-rag" },
     { name = "agentkit-builtin-memory-sliding-window", editable = "packages/agentkit-builtin/memory-sliding-window" },
     { name = "agentkit-builtin-model-mock", editable = "packages/agentkit-builtin/model-mock" },
@@ -385,6 +431,8 @@ dev = [
     { name = "agentkit-builtin-tool-mcp", editable = "packages/agentkit-builtin/tool-mcp" },
     { name = "agentkit-cli", editable = "packages/agentkit-cli" },
     { name = "agentkit-demo-compliance", editable = "examples/third-party-element-demo" },
+    { name = "agentkit-demo-http-tool", editable = "examples/http-plugin-demo" },
+    { name = "agentkit-demo-subprocess-tool", editable = "examples/subprocess-plugin-demo" },
     { name = "agentkit-server", editable = "packages/agentkit-server" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "pytest", specifier = ">=8.0" },

@@ -11,6 +11,8 @@ members = [
     "packages/agentkit-server",
     "packages/agentkit-builtin/*",
     "examples/third-party-element-demo",
+    "examples/subprocess-plugin-demo",
+    "examples/http-plugin-demo",
 ]
 
 [tool.uv.sources]
@@ -32,10 +34,13 @@ agentkit-builtin-obs-console = { workspace = true }
 agentkit-builtin-obs-jsonl = { workspace = true }
 agentkit-builtin-obs-otel = { workspace = true }
 agentkit-builtin-obs-langfuse = { workspace = true }
+agentkit-builtin-extensibility-hooks = { workspace = true }
 agentkit-builtin-model-openai = { workspace = true }
 agentkit-builtin-model-litellm = { workspace = true }
 agentkit-builtin-model-mock = { workspace = true }
 agentkit-demo-compliance = { workspace = true }
+agentkit-demo-subprocess-tool = { workspace = true }
+agentkit-demo-http-tool = { workspace = true }
 
 [dependency-groups]
 dev = [
@@ -56,9 +61,12 @@ dev = [
     "agentkit-builtin-obs-console",
     "agentkit-builtin-obs-jsonl",
     "agentkit-builtin-obs-otel",
+    "agentkit-builtin-extensibility-hooks",
     "agentkit-builtin-model-openai",
     "agentkit-builtin-model-mock",
     "agentkit-demo-compliance",
+    "agentkit-demo-subprocess-tool",
+    "agentkit-demo-http-tool",
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
     "httpx>=0.27",

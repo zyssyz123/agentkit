@@ -28,7 +28,9 @@ from agentkit.context import (
     Message,
     RawInput,
 )
+import asyncio
 from agentkit.events import Event, EventBus, EventType
+from agentkit.hooks import HookCallable, HookManager
 from agentkit.hub import (
     ElementHub,
     ExecutorHost,
@@ -58,6 +60,7 @@ class Runtime:
     store: ContextStore
     config: AgentConfig
     models: ModelHub
+    hooks: HookManager
 
     # ---------- factories ---------------------------------------------------------------------
 
@@ -77,9 +80,15 @@ class Runtime:
         # Always discover entry points so installed packages register themselves.
         registry.discover_entry_points()
 
+        # Spawn / probe out-of-process plugins declared under `external_plugins:` and
+        # register their proxies as in-process Techniques. This blocks until each
+        # external runtime hands us its component list.
+        external_runtimes = _bootstrap_external_plugins(cfg, registry)
+
         models = _build_model_hub(cfg)
         hub = _build_hub(cfg, registry, models)
         bus = EventBus()
+        hooks = _build_hook_manager(cfg, registry, models)
 
         if store is None:
             if cfg.store.type == "jsonl":
@@ -96,7 +105,48 @@ class Runtime:
 
         bus.subscribe(_fan_out)
 
-        return cls(hub=hub, bus=bus, store=store, config=cfg, models=models)
+        rt = cls(hub=hub, bus=bus, store=store, config=cfg, models=models, hooks=hooks)
+        rt._external_runtimes = external_runtimes  # for explicit shutdown if desired
+        return rt
+
+    # ---------- hook helpers ------------------------------------------------------------------
+
+    async def _wrap_call(
+        self,
+        element: str,
+        method: str,
+        ctx: AgentContext,
+        coro_factory,
+        payload: dict | None = None,
+    ):
+        """Run a coroutine between matching ``before/after/error`` hooks.
+
+        Returns ``(result, ctx_after)`` so the caller can pick up any context
+        mutations produced by hook subscribers.
+        """
+        ctx_now = ctx
+        for patch in await self.hooks.fire("before", element, method, ctx_now, payload):
+            ctx_now = await self._apply(ctx_now, patch, f"hook:{element}")
+
+        try:
+            result = await coro_factory(ctx_now)
+        except Exception as exc:
+            for patch in await self.hooks.fire(
+                "error",
+                element,
+                method,
+                ctx_now,
+                {**(payload or {}), "error": str(exc), "kind": exc.__class__.__name__},
+            ):
+                ctx_now = await self._apply(ctx_now, patch, f"hook:{element}")
+            raise
+
+        after_payload = {**(payload or {}), "result": _summarise(result)}
+        for patch in await self.hooks.fire(
+            "after", element, method, ctx_now, after_payload
+        ):
+            ctx_now = await self._apply(ctx_now, patch, f"hook:{element}")
+        return result, ctx_now
 
     # ---------- public API --------------------------------------------------------------------
 
@@ -140,7 +190,9 @@ class Runtime:
 
         try:
             # 1. Perception
-            patch = await self.hub.perception.parse(ctx)
+            patch, ctx = await self._wrap_call(
+                "perception", "parse", ctx, lambda c: self.hub.perception.parse(c)
+            )
             ctx = await self._apply(ctx, patch, "perception")
             yield await emit(
                 Event(type=EventType.PERCEPTION_DONE, element="perception", patch=patch)
@@ -148,7 +200,13 @@ class Runtime:
 
             # 2. Memory recall
             query = ctx.parsed_input.query if ctx.parsed_input else ctx.raw_input.text
-            patch = await self.hub.memory.recall(ctx, query)
+            patch, ctx = await self._wrap_call(
+                "memory",
+                "recall",
+                ctx,
+                lambda c: self.hub.memory.recall(c, query),
+                payload={"query": query},
+            )
             ctx = await self._apply(ctx, patch, "memory")
             yield await emit(
                 Event(type=EventType.MEMORY_RECALLED, element="memory", patch=patch)
@@ -173,11 +231,24 @@ class Runtime:
 
                 await self.hub.safety.pre_check(ctx)
 
-                # 3a. Plan one round (streamed)
+                # 3a. Plan one round (streamed). Fire before/after.planner.plan around the
+                # entire streaming round; per-event hooks would be too chatty.
+                for hp in await self.hooks.fire("before", "planner", "plan", ctx, {}):
+                    ctx = await self._apply(ctx, hp, "hook:planner")
+
                 async for ev in self.hub.planner.plan(ctx):
                     yield await emit(ev)
                     if ev.patch:
                         ctx = await self._apply(ctx, ev.patch, ev.element or "planner")
+
+                for hp in await self.hooks.fire(
+                    "after",
+                    "planner",
+                    "plan",
+                    ctx,
+                    {"plan": ctx.plan.__dict__ if ctx.plan else None},
+                ):
+                    ctx = await self._apply(ctx, hp, "hook:planner")
 
                 ctx = ctx.patch(budget=ctx.budget.consume(steps=1))
 
@@ -191,14 +262,19 @@ class Runtime:
                     )
                     break
 
-                # 3b. Execute next action via Tool Element
+                # 3b. Execute next action via Tool Element. Wrap the ToolHost so that
+                # before/after.tool.invoke hooks fire around each tool call.
                 if ctx.plan and ctx.plan.next_action is not None:
-                    async for ev in self.hub.executor.run(ctx, self.hub.tool):
+                    hooked_tools = _HookedToolHost(self.hub.tool, self.hooks, lambda: ctx)
+                    async for ev in self.hub.executor.run(ctx, hooked_tools):
                         yield await emit(ev)
                         if ev.patch:
                             ctx = await self._apply(
                                 ctx, ev.patch, ev.element or "executor"
                             )
+                    # Apply patches collected by hook subscribers during tool invocation.
+                    for patch in hooked_tools.collected_patches:
+                        ctx = await self._apply(ctx, patch, "hook:tool")
                 else:
                     # Planner produced neither final nor action — break to avoid infinite loop.
                     break
@@ -281,6 +357,160 @@ class Runtime:
 
 
 # ---------- private helpers ------------------------------------------------------------------
+
+
+class _HookedToolHost:
+    """ToolHost wrapper that fires before/after/error.tool.invoke hooks per call.
+
+    Patches returned by hook subscribers are buffered onto ``collected_patches`` and
+    applied by the Runtime after the executor's async generator completes (because
+    we cannot mutate the executor's local ctx mid-iteration).
+    """
+
+    def __init__(self, inner, hooks: HookManager, ctx_supplier):
+        self._inner = inner
+        self._hooks = hooks
+        self._ctx_supplier = ctx_supplier
+        self.collected_patches: list[ContextPatch] = []
+
+    async def list_tools(self):
+        return await self._inner.list_tools()
+
+    async def invoke_tool(self, call):
+        ctx = self._ctx_supplier()
+        call_payload = {
+            "call": {"id": call.id, "name": call.name, "arguments": call.arguments}
+        }
+        self.collected_patches.extend(
+            await self._hooks.fire("before", "tool", "invoke", ctx, call_payload)
+        )
+        try:
+            result = await self._inner.invoke_tool(call)
+        except Exception as exc:
+            self.collected_patches.extend(
+                await self._hooks.fire(
+                    "error",
+                    "tool",
+                    "invoke",
+                    ctx,
+                    {**call_payload, "error": str(exc), "kind": exc.__class__.__name__},
+                )
+            )
+            raise
+        self.collected_patches.extend(
+            await self._hooks.fire(
+                "after",
+                "tool",
+                "invoke",
+                ctx,
+                {
+                    **call_payload,
+                    "result": {
+                        "output": _summarise(result.output),
+                        "error": result.error,
+                        "latency_ms": result.latency_ms,
+                    },
+                },
+            )
+        )
+        return result
+
+
+def _bootstrap_external_plugins(cfg: AgentConfig, registry: Registry) -> list:
+    """Register Technique proxies for every ``external_plugins:`` entry.
+
+    The proxies are **lazy**: they spawn the subprocess (or open the HTTP client)
+    only on first invocation, and they do so inside the caller's event loop. This
+    avoids cross-loop bugs when ``Runtime.from_config`` is called from inside an
+    already-running asyncio loop (FastAPI handlers, pytest-asyncio tests, etc.).
+    """
+    if not cfg.external_plugins:
+        return []
+    from agentkit.loader.http import HttpPluginRuntime, _PROXY_BUILDERS as _HTTP_BUILDERS
+    from agentkit.loader.subprocess import (
+        SubprocessPluginRuntime,
+        _PROXY_BUILDERS as _SUBPROC_BUILDERS,
+    )
+
+    runtimes: list = []
+
+    for plugin_cfg in cfg.external_plugins:
+        if not plugin_cfg.components:
+            raise ValueError(
+                f"external_plugin {plugin_cfg.name!r} must declare its 'components:' "
+                "list (lazy spawn requires component shape upfront)."
+            )
+
+        if plugin_cfg.runtime == "subprocess":
+            if not plugin_cfg.command:
+                raise ValueError(
+                    f"external_plugin {plugin_cfg.name!r} (subprocess) needs a 'command'"
+                )
+            rt = SubprocessPluginRuntime(
+                command=plugin_cfg.command, env=plugin_cfg.env or None
+            )
+            builders = _SUBPROC_BUILDERS
+            client_handle = rt.client  # _RpcClient
+
+            def _make_proxy(comp_cfg, _rt=rt, _builders=builders):
+                element = comp_cfg.element
+                builder = _builders.get(element)
+                if builder is None:
+                    raise ValueError(
+                        f"Subprocess plugin component for unknown Element {element!r}; "
+                        f"supported: {sorted(_builders)}"
+                    )
+                return builder(
+                    _rt.client,
+                    {
+                        "name": f"{comp_cfg.element}.{comp_cfg.name}",
+                        "element": comp_cfg.element,
+                        "capabilities": comp_cfg.capabilities,
+                        "version": comp_cfg.version,
+                    },
+                )
+
+        elif plugin_cfg.runtime == "http":
+            if not plugin_cfg.base_url:
+                raise ValueError(
+                    f"external_plugin {plugin_cfg.name!r} (http) needs 'base_url'"
+                )
+            rt = HttpPluginRuntime(
+                base_url=plugin_cfg.base_url, headers=plugin_cfg.headers or None
+            )
+            builders = _HTTP_BUILDERS
+
+            def _make_proxy(comp_cfg, _rt=rt, _builders=builders):
+                element = comp_cfg.element
+                builder = _builders.get(element)
+                if builder is None:
+                    raise ValueError(
+                        f"HTTP plugin component for unknown Element {element!r}; "
+                        f"supported: {sorted(_builders)}"
+                    )
+                return builder(
+                    _rt,
+                    {
+                        "name": f"{comp_cfg.element}.{comp_cfg.name}",
+                        "element": comp_cfg.element,
+                        "capabilities": comp_cfg.capabilities,
+                        "version": comp_cfg.version,
+                    },
+                )
+
+        else:
+            raise ValueError(
+                f"Unknown external_plugin runtime {plugin_cfg.runtime!r}; "
+                "supported: subprocess, http"
+            )
+
+        for comp_cfg in plugin_cfg.components:
+            proxy = _make_proxy(comp_cfg)
+            registry.register_technique(
+                comp_cfg.element, comp_cfg.name, lambda *_a, _p=proxy, **_kw: _p
+            )
+        runtimes.append(rt)
+    return runtimes
 
 
 def _build_model_hub(cfg: AgentConfig) -> ModelHub:
@@ -400,6 +630,78 @@ def _instantiate_technique(factory, config: dict, models: ModelHub):
     raise RuntimeError(
         f"Could not call Technique factory {factory!r} with any known signature"
     ) from last_bind_failure
+
+
+def _build_hook_manager(
+    cfg: AgentConfig, registry: Registry, models: ModelHub
+) -> HookManager:
+    """Build a HookManager from agent.yaml's ``hooks:`` block.
+
+    Each hook entry references either:
+    * a registered Technique by qualified name (``element.name``), in which case its
+      ``on_lifecycle(event_name, ctx, payload)`` method is bound, OR
+    * a dotted ``module:Callable`` import path that yields the same async signature.
+    """
+    hm = HookManager()
+    for hook_cfg in cfg.hooks:
+        handler = _resolve_hook_handler(hook_cfg.technique, hook_cfg.config, registry, models)
+        hm.subscribe(hook_cfg.on, handler, label=hook_cfg.technique)
+    return hm
+
+
+def _resolve_hook_handler(
+    target: str, config: dict, registry: Registry, models: ModelHub
+) -> HookCallable:
+    """Resolve ``target`` to an async hook callable.
+
+    ``target`` may be ``element.name`` (a registered Technique) or ``module:Callable``.
+    """
+    if ":" in target:
+        # Dotted import: ``my_pkg.module:my_hook`` or ``my_pkg.module:HookCls``.
+        import importlib
+
+        module_path, _, attr = target.partition(":")
+        module = importlib.import_module(module_path)
+        obj = getattr(module, attr)
+        if isinstance(obj, type):
+            instance = _instantiate_technique(obj, config, models)
+            return _bind_lifecycle_method(instance)
+        return obj  # already a callable
+
+    # Try Technique registry by ``element.name``.
+    element, _, name = target.partition(".")
+    if not name:
+        raise ValueError(
+            f"Hook target {target!r} must be 'element.technique' or 'module:Callable'."
+        )
+    factory = registry.get_technique_factory(element, name)
+    instance = _instantiate_technique(factory, config, models)
+    return _bind_lifecycle_method(instance)
+
+
+def _bind_lifecycle_method(instance) -> HookCallable:
+    """Return an async hook callable bound to ``instance``.
+
+    Looks for ``on_lifecycle`` first, then ``__call__``. Both are common patterns.
+    """
+    for attr in ("on_lifecycle", "__call__"):
+        method = getattr(instance, attr, None)
+        if method is not None and callable(method):
+            return method  # type: ignore[return-value]
+    raise TypeError(
+        f"Hook target {type(instance).__name__} has neither on_lifecycle nor __call__"
+    )
+
+
+def _summarise(value):
+    """Best-effort short representation for hook payloads / event logs."""
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, dict):
+        return {str(k): _summarise(v) for k, v in list(value.items())[:20]}
+    if isinstance(value, (list, tuple, set)):
+        return [_summarise(v) for v in list(value)[:20]]
+    return repr(value)[:200]
 
 
 def _attach_run(event: Event, run_id: str) -> Event:

@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentkit-demo-http-tool"
+version = "0.1.0"
+description = "Demo HTTP plugin: a Tool Technique exposed via FastAPI."
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["agentkit>=0.1.0", "fastapi>=0.115", "uvicorn>=0.30"]
+
+[project.scripts]
+agentkit-demo-http-tool = "agentkit_demo_http_tool.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentkit_demo_http_tool"]

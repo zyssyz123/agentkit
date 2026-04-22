@@ -59,6 +59,36 @@ class ProviderConfig(BaseModel):
     config: dict[str, Any] = Field(default_factory=dict)
 
 
+class ExternalComponentConfig(BaseModel):
+    """A single component an external plugin exposes (declared up-front in agent.yaml)."""
+
+    model_config = ConfigDict(extra="allow")
+
+    element: str
+    name: str
+    capabilities: list[str] = Field(default_factory=list)
+    version: str = "0.0.0"
+
+
+class ExternalPluginConfig(BaseModel):
+    """One external (subprocess/HTTP) plugin entry in agent.yaml `external_plugins:`.
+
+    Plugins must declare the components they expose so the Runtime can register
+    Technique proxies eagerly (and the subprocess can be spawned lazily on first use,
+    inside whatever event loop is actually invoking the tool).
+    """
+
+    model_config = ConfigDict(extra="allow")
+
+    name: str
+    runtime: str  # "subprocess" | "http"
+    command: str | list[str] | None = None        # subprocess only
+    env: dict[str, str] = Field(default_factory=dict)
+    base_url: str | None = None                   # http only
+    headers: dict[str, str] = Field(default_factory=dict)
+    components: list[ExternalComponentConfig] = Field(default_factory=list)
+
+
 class AgentConfig(BaseModel):
     model_config = ConfigDict(extra="allow")
 
@@ -78,6 +108,9 @@ class AgentConfig(BaseModel):
 
     # Optional: dotted module paths to side-effect-import before discovery.
     plugin_modules: list[str] = Field(default_factory=list)
+
+    # External (subprocess / HTTP) plugins that contribute Techniques out-of-process.
+    external_plugins: list[ExternalPluginConfig] = Field(default_factory=list)
 
 
 # ---------- loader ---------------------------------------------------------------------------
@@ -99,8 +132,22 @@ def expand_env(text: str) -> str:
     return _ENV_REF_RE.sub(_replace, text)
 
 
+def _normalise_hook_keys(data: dict[str, Any]) -> dict[str, Any]:
+    """Work around the YAML 1.1 'Norway problem': PyYAML parses unquoted ``on:`` as
+    boolean ``True``. We rewrite those keys back to the string ``"on"`` so the
+    HookConfig schema sees what the user wrote."""
+    hooks = data.get("hooks")
+    if isinstance(hooks, list):
+        for entry in hooks:
+            if isinstance(entry, dict) and True in entry:
+                entry["on"] = entry.pop(True)
+    return data
+
+
 def load_agent_config(path: str | Path) -> AgentConfig:
     raw = Path(path).read_text(encoding="utf-8")
     expanded = expand_env(raw)
     data = yaml.safe_load(expanded) or {}
+    if isinstance(data, dict):
+        data = _normalise_hook_keys(data)
     return AgentConfig.model_validate(data)
