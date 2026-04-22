@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.1.0a9 — marketplace polish + bare-name install (2026-04-22)
+
+Third round of first-time-user dogfood caught three more rough edges on
+the plugin-install / discovery path. All three fixed in `aglet-cli 0.1.0a8`.
+
+| # | Bug | Fix |
+| --- | --- | --- |
+| F7 | `aglet marketplace list` truncated package names to `aglet-builtin-too…` — users couldn't read what to install | Added `overflow="fold"` to the Package column so long names wrap onto multiple lines instead of ellipsising. |
+| F8 | `aglet marketplace install` reported every already-installed technique as "newly registered" (same class of bug we fixed earlier for `aglet plugin install`). | Capture the registry state BEFORE pip runs so the diff is against the real prior state. |
+| F9 | `aglet plugin install my-new-tech` was interpreted by uv pip as a PyPI distribution name (which doesn't exist) instead of the local directory the user just scaffolded with `aglet plugin new`. | New `_normalise_install_target()` helper: if the target is a bare name AND a local directory with that name + a `pyproject.toml` inside exists, auto-prepend `./` and print a "(interpreted … as a local directory)" breadcrumb. |
+
+Validated against PyPI in a fresh venv:
+
+* `aglet marketplace list` now shows wrapped-but-readable package names
+  such as `aglet-builtin-mode` / `l-openai` across two lines.
+* `aglet marketplace install aglet-builtin-planner-reflexion` reports
+  only `+ technique planner.reflexion` instead of everything.
+* `aglet plugin install my-demo` (no `./`) auto-resolves to the local
+  directory and prints the inferred path.
+
 ## 0.1.0a8 — runtime ctx inspection + plugin install sandboxing (2026-04-22)
 
 Closes the last open dogfood finding — at runtime, users had no way to see

@@ -663,6 +663,32 @@ def _pip_install_prefix() -> list[str]:
     return [sys.executable, "-m", "pip", "install"]
 
 
+def _normalise_install_target(target: str) -> str:
+    """Disambiguate bare strings that are actually local directory names.
+
+    ``uv pip install my-plugin`` treats ``my-plugin`` as a PyPI distribution
+    name by default, which fails for users who just ran ``aglet plugin new
+    my-plugin`` and then tried to install it by name. If there's a local
+    directory with that exact name AND a ``pyproject.toml`` inside, prepend
+    ``./`` so pip treats it as a local path install.
+    """
+    # Anything that already looks like a path / URL / git ref is passed through.
+    if any(marker in target for marker in ("/", "\\", "@", "://")):
+        return target
+    if target.startswith(("git+", "file:", ".", "~")):
+        return target
+
+    candidate = Path.cwd() / target
+    if candidate.is_dir() and (candidate / "pyproject.toml").exists():
+        resolved = "./" + target
+        console.print(
+            f"[dim](interpreted {target!r} as a local directory: "
+            f"{candidate}; using {resolved})[/]"
+        )
+        return resolved
+    return target
+
+
 def _pip_uninstall_prefix() -> list[str]:
     if shutil.which("uv"):
         return ["uv", "pip", "uninstall", "--python", sys.executable]
@@ -847,7 +873,8 @@ def plugin_install(
     before_techs = set(registry.technique_factories)
     before_elements = set(registry.elements)
 
-    cmd = [*_pip_install_prefix(), target]
+    normalised_target = _normalise_install_target(target)
+    cmd = [*_pip_install_prefix(), normalised_target]
     console.print(f"[dim]$ {' '.join(cmd)}[/]")
     try:
         subprocess.check_call(cmd)
@@ -964,7 +991,9 @@ def marketplace_list(
         raise typer.Exit(code=1) from exc
     plugins = data.get("plugins", [])
     table = Table(title=f"Aglet marketplace — {len(plugins)} plugins")
-    table.add_column("Package")
+    # overflow="fold" on Package too: some names are 40+ chars and would
+    # otherwise get truncated to 'aglet-builtin-too…' in a dense listing.
+    table.add_column("Package", overflow="fold", no_wrap=False)
     table.add_column("Element", style="cyan")
     table.add_column("Kind")
     table.add_column("Version")
@@ -1048,6 +1077,13 @@ def marketplace_install(
         )
         raise typer.Exit(code=1)
 
+    # Force discovery BEFORE pip so the diff is against the real prior state,
+    # not the lazily-empty registry at CLI startup.
+    registry = get_registry()
+    registry.discover_entry_points()
+    before_techs = set(registry.technique_factories)
+    before_elements = set(registry.elements)
+
     cmd = [*_pip_install_prefix(), "--pre", name]
     console.print(f"[dim]$ {' '.join(cmd)}[/]")
     try:
@@ -1056,14 +1092,15 @@ def marketplace_install(
         console.print(f"[red]install failed (exit {exc.returncode}).[/]")
         raise typer.Exit(code=exc.returncode) from exc
 
-    registry = get_registry()
-    before = set(registry.technique_factories)
     registry.discover_entry_points()
-    new = sorted(set(registry.technique_factories) - before)
-    if new:
-        console.print(f"\n[green]Installed[/] [bold]{name}[/]. New techniques:")
-        for n in new:
-            console.print(f"  - {n}")
+    new_techs = sorted(set(registry.technique_factories) - before_techs)
+    new_elements = sorted(set(registry.elements) - before_elements)
+    if new_techs or new_elements:
+        console.print(f"\n[green]Installed[/] [bold]{name}[/]. Newly registered:")
+        for e in new_elements:
+            console.print(f"  + [cyan]element[/] {e}")
+        for t in new_techs:
+            console.print(f"  + [cyan]technique[/] {t}")
     else:
         console.print(f"\n[green]Installed[/] [bold]{name}[/].")
 

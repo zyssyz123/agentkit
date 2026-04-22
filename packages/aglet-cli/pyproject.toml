@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "aglet-cli"
-version = "0.1.0a7"
+version = "0.1.0a8"
 description = "Aglet command-line interface (init / run / elements / techniques)."
 authors = [{ name = "The Aglet Contributors" }]
 license = "Apache-2.0"
