@@ -1,5 +1,9 @@
 # Aglet
 
+[![PyPI](https://img.shields.io/pypi/v/aglet?label=aglet&color=blue)](https://pypi.org/project/aglet/)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12%20%7C%203.13-blue)](pyproject.toml)
+
 > Make every Agent capability a swappable plugin.
 
 A pluggable Agent runtime with two-dimensional extensibility:
