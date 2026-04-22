@@ -8,7 +8,7 @@ from typing import Any
 import httpx
 import pytest
 
-from agentkit.loader.http import HttpPluginRuntime, load_http_plugin
+from aglet.loader.http import HttpPluginRuntime, load_http_plugin
 
 
 class _AsgiTransportRuntime(HttpPluginRuntime):
@@ -31,7 +31,7 @@ class _AsgiTransportRuntime(HttpPluginRuntime):
 
 @pytest.mark.asyncio
 async def test_http_plugin_list_and_invoke():
-    from agentkit_demo_http_tool import build_app
+    from aglet_demo_http_tool import build_app
 
     rt = _AsgiTransportRuntime(build_app())
     components = await rt.list_components()

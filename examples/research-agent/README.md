@@ -16,14 +16,14 @@ Exercises every M2 capability:
 ```bash
 export OPENAI_API_KEY=sk-...
 uv sync
-uv run agentkit run examples/research-agent/agent.yaml \
-  --input "What is AgentKit and what makes it different from LangChain?"
+uv run aglet run examples/research-agent/agent.yaml \
+  --input "What is Aglet and what makes it different from LangChain?"
 ```
 
 Or hit it via the HTTP server:
 
 ```bash
-uv run agentkit-serve examples/research-agent/agent.yaml --port 8088
+uv run aglet-serve examples/research-agent/agent.yaml --port 8088
 # in another shell:
 curl -N -H 'Content-Type: application/json' \
   -d '{"input": "Hello"}' \

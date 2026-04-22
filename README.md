@@ -1,4 +1,4 @@
-# AgentKit
+# Aglet
 
 > Make every Agent capability a swappable plugin.
 
@@ -16,26 +16,26 @@ A single declarative `agent.yaml` boots a complete, observable, extensible Agent
 uv sync
 
 # scaffold a new agent
-uv run agentkit init my-agent
+uv run aglet init my-agent
 cd my-agent
 
 # run it
-uv run agentkit run agent.yaml --input "Hello, AgentKit!"
+uv run aglet run agent.yaml --input "Hello, Aglet!"
 ```
 
 Inspect the run trace:
 
 ```bash
-ls .agentkit/runs/
+ls .aglet/runs/
 ```
 
 ## Repository layout
 
 ```
 packages/
-  agentkit-core/        # protocols + runtime + event bus + loader
-  agentkit-cli/         # Typer-based CLI
-  agentkit-builtin/*    # one PyPI package per built-in technique
+  aglet-core/        # protocols + runtime + event bus + loader
+  aglet-cli/         # Typer-based CLI
+  aglet-builtin/*    # one PyPI package per built-in technique
 examples/
   echo-agent/           # M1 end-to-end example
 docs/

@@ -6,9 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from agentkit.config import load_agent_config
-from agentkit.events import EventType
-from agentkit.runtime import Runtime
+from aglet.config import load_agent_config
+from aglet.events import EventType
+from aglet.runtime import Runtime
 
 EXAMPLE_DIR = Path(__file__).resolve().parents[2] / "examples" / "echo-agent"
 
@@ -27,7 +27,7 @@ async def test_echo_agent_end_to_end(tmp_path):
     seen_types: list[str] = []
     output_chunks: list[str] = []
 
-    async for ev in runtime.run("hello, AgentKit!"):
+    async for ev in runtime.run("hello, Aglet!"):
         seen_types.append(ev.type.value)
         if ev.type == EventType.OUTPUT_CHUNK and isinstance(ev.payload, dict):
             output_chunks.append(ev.payload.get("text", ""))
@@ -40,7 +40,7 @@ async def test_echo_agent_end_to_end(tmp_path):
     assert EventType.OUTPUT_END.value in seen_types
     assert EventType.RUN_COMPLETED.value in seen_types
 
-    assert "".join(output_chunks) == "Echo: hello, AgentKit!"
+    assert "".join(output_chunks) == "Echo: hello, Aglet!"
 
     # The store should have written at least one trace file.
     runs_dir = tmp_path / "runs"

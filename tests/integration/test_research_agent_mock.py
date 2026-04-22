@@ -7,9 +7,9 @@ import textwrap
 
 import pytest
 
-from agentkit.config import load_agent_config
-from agentkit.events import EventType
-from agentkit.runtime import Runtime
+from aglet.config import load_agent_config
+from aglet.events import EventType
+from aglet.runtime import Runtime
 
 
 AGENT_YAML = textwrap.dedent(
@@ -53,7 +53,7 @@ AGENT_YAML = textwrap.dedent(
             config:
               tools:
                 - name: now_iso
-                  import: agentkit_builtin_tool_local_python.demo:now_iso
+                  import: aglet_builtin_tool_local_python.demo:now_iso
                   description: Current UTC time.
                   parameters_schema:
                     type: object
@@ -80,7 +80,7 @@ AGENT_YAML = textwrap.dedent(
 
     store:
       type: memory
-      directory: .agentkit/test-runs
+      directory: .aglet/test-runs
     """
 )
 

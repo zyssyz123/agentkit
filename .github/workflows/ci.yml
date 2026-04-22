@@ -41,10 +41,10 @@ jobs:
 
       - name: Smoke test — echo agent CLI
         run: |
-          uv run agentkit init /tmp/ci-agent
-          uv run agentkit run /tmp/ci-agent/agent.yaml --input "ci hello" --quiet
+          uv run aglet init /tmp/ci-agent
+          uv run aglet run /tmp/ci-agent/agent.yaml --input "ci hello" --quiet
 
       - name: Verify entry-points discovery
         run: |
-          uv run agentkit elements
-          uv run agentkit techniques
+          uv run aglet elements
+          uv run aglet techniques

@@ -6,9 +6,9 @@ import textwrap
 
 import pytest
 
-from agentkit.config import load_agent_config
-from agentkit.events import EventType
-from agentkit.runtime import Runtime
+from aglet.config import load_agent_config
+from aglet.events import EventType
+from aglet.runtime import Runtime
 
 
 YAML = textwrap.dedent(

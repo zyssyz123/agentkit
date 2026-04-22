@@ -1,81 +1,81 @@
 [project]
-name = "agentkit-workspace"
+name = "aglet-workspace"
 version = "0.2.0"
-description = "AgentKit monorepo workspace root (not published)."
+description = "Aglet monorepo workspace root (not published)."
 requires-python = ">=3.11"
 
 [tool.uv.workspace]
 members = [
-    "packages/agentkit-core",
-    "packages/agentkit-cli",
-    "packages/agentkit-server",
-    "packages/agentkit-eval",
-    "packages/agentkit-builtin/*",
+    "packages/aglet",
+    "packages/aglet-cli",
+    "packages/aglet-server",
+    "packages/aglet-eval",
+    "packages/aglet-builtin/*",
     "examples/third-party-element-demo",
     "examples/subprocess-plugin-demo",
     "examples/http-plugin-demo",
 ]
 
 [tool.uv.sources]
-agentkit = { workspace = true }
-agentkit-cli = { workspace = true }
-agentkit-server = { workspace = true }
-agentkit-eval = { workspace = true }
-agentkit-builtin-perception-passthrough = { workspace = true }
-agentkit-builtin-memory-sliding-window = { workspace = true }
-agentkit-builtin-memory-rag = { workspace = true }
-agentkit-builtin-planner-echo = { workspace = true }
-agentkit-builtin-planner-react = { workspace = true }
-agentkit-builtin-planner-reflexion = { workspace = true }
-agentkit-builtin-planner-tot = { workspace = true }
-agentkit-builtin-tool-local-python = { workspace = true }
-agentkit-builtin-tool-http-openapi = { workspace = true }
-agentkit-builtin-tool-mcp = { workspace = true }
-agentkit-builtin-tool-subagent = { workspace = true }
-agentkit-builtin-executor-sequential = { workspace = true }
-agentkit-builtin-safety-budget = { workspace = true }
-agentkit-builtin-output-streaming-text = { workspace = true }
-agentkit-builtin-obs-console = { workspace = true }
-agentkit-builtin-obs-jsonl = { workspace = true }
-agentkit-builtin-obs-otel = { workspace = true }
-agentkit-builtin-obs-langfuse = { workspace = true }
-agentkit-builtin-extensibility-hooks = { workspace = true }
-agentkit-builtin-model-openai = { workspace = true }
-agentkit-builtin-model-litellm = { workspace = true }
-agentkit-builtin-model-mock = { workspace = true }
-agentkit-demo-compliance = { workspace = true }
-agentkit-demo-subprocess-tool = { workspace = true }
-agentkit-demo-http-tool = { workspace = true }
+aglet = { workspace = true }
+aglet-cli = { workspace = true }
+aglet-server = { workspace = true }
+aglet-eval = { workspace = true }
+aglet-builtin-perception-passthrough = { workspace = true }
+aglet-builtin-memory-sliding-window = { workspace = true }
+aglet-builtin-memory-rag = { workspace = true }
+aglet-builtin-planner-echo = { workspace = true }
+aglet-builtin-planner-react = { workspace = true }
+aglet-builtin-planner-reflexion = { workspace = true }
+aglet-builtin-planner-tot = { workspace = true }
+aglet-builtin-tool-local-python = { workspace = true }
+aglet-builtin-tool-http-openapi = { workspace = true }
+aglet-builtin-tool-mcp = { workspace = true }
+aglet-builtin-tool-subagent = { workspace = true }
+aglet-builtin-executor-sequential = { workspace = true }
+aglet-builtin-safety-budget = { workspace = true }
+aglet-builtin-output-streaming-text = { workspace = true }
+aglet-builtin-obs-console = { workspace = true }
+aglet-builtin-obs-jsonl = { workspace = true }
+aglet-builtin-obs-otel = { workspace = true }
+aglet-builtin-obs-langfuse = { workspace = true }
+aglet-builtin-extensibility-hooks = { workspace = true }
+aglet-builtin-model-openai = { workspace = true }
+aglet-builtin-model-litellm = { workspace = true }
+aglet-builtin-model-mock = { workspace = true }
+aglet-demo-compliance = { workspace = true }
+aglet-demo-subprocess-tool = { workspace = true }
+aglet-demo-http-tool = { workspace = true }
 
 [dependency-groups]
 dev = [
-    "agentkit",
-    "agentkit-cli",
-    "agentkit-server",
-    "agentkit-eval",
-    "agentkit-builtin-perception-passthrough",
-    "agentkit-builtin-memory-sliding-window",
-    "agentkit-builtin-memory-rag",
-    "agentkit-builtin-planner-echo",
-    "agentkit-builtin-planner-react",
-    "agentkit-builtin-planner-reflexion",
-    "agentkit-builtin-planner-tot",
-    "agentkit-builtin-tool-local-python",
-    "agentkit-builtin-tool-http-openapi",
-    "agentkit-builtin-tool-mcp",
-    "agentkit-builtin-tool-subagent",
-    "agentkit-builtin-executor-sequential",
-    "agentkit-builtin-safety-budget",
-    "agentkit-builtin-output-streaming-text",
-    "agentkit-builtin-obs-console",
-    "agentkit-builtin-obs-jsonl",
-    "agentkit-builtin-obs-otel",
-    "agentkit-builtin-extensibility-hooks",
-    "agentkit-builtin-model-openai",
-    "agentkit-builtin-model-mock",
-    "agentkit-demo-compliance",
-    "agentkit-demo-subprocess-tool",
-    "agentkit-demo-http-tool",
+    "aglet",
+    "aglet-cli",
+    "aglet-server",
+    "aglet-eval",
+    "aglet-builtin-perception-passthrough",
+    "aglet-builtin-memory-sliding-window",
+    "aglet-builtin-memory-rag",
+    "aglet-builtin-planner-echo",
+    "aglet-builtin-planner-react",
+    "aglet-builtin-planner-reflexion",
+    "aglet-builtin-planner-tot",
+    "aglet-builtin-tool-local-python",
+    "aglet-builtin-tool-http-openapi",
+    "aglet-builtin-tool-mcp",
+    "aglet-builtin-tool-subagent",
+    "aglet-builtin-executor-sequential",
+    "aglet-builtin-safety-budget",
+    "aglet-builtin-output-streaming-text",
+    "aglet-builtin-obs-console",
+    "aglet-builtin-obs-jsonl",
+    "aglet-builtin-obs-otel",
+    "aglet-builtin-extensibility-hooks",
+    "aglet-builtin-model-openai",
+    "aglet-builtin-model-mock",
+    "aglet-demo-compliance",
+    "aglet-demo-subprocess-tool",
+    "aglet-demo-http-tool",
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
     "httpx>=0.27",
@@ -85,8 +85,8 @@ dev = [
 # Heavyweight optional builtins (litellm, langfuse) live in their own group so the dev
 # install stays light. Enable with: `uv sync --group heavy`.
 heavy = [
-    "agentkit-builtin-model-litellm",
-    "agentkit-builtin-obs-langfuse",
+    "aglet-builtin-model-litellm",
+    "aglet-builtin-obs-langfuse",
 ]
 
 [tool.ruff]

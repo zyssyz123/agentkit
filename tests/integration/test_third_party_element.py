@@ -1,7 +1,7 @@
 """End-to-end test for the third-party-element demo: confirms a wholly new Element kind
 ('compliance') contributed via PyPI entry-points works with no core changes.
 
-Validates AgentKit's two-dimensional pluggability promise."""
+Validates Aglet's two-dimensional pluggability promise."""
 
 from __future__ import annotations
 
@@ -9,11 +9,11 @@ from pathlib import Path
 
 import pytest
 
-from agentkit.config import load_agent_config
-from agentkit.events import EventType
-from agentkit.protocols import ELEMENT_NAMES
-from agentkit.registry import get_registry
-from agentkit.runtime import Runtime
+from aglet.config import load_agent_config
+from aglet.events import EventType
+from aglet.protocols import ELEMENT_NAMES
+from aglet.registry import get_registry
+from aglet.runtime import Runtime
 
 AGENT_YAML = (
     Path(__file__).resolve().parents[2]
@@ -59,7 +59,7 @@ async def test_compliance_element_is_discovered_and_runs(tmp_path):
 @pytest.mark.asyncio
 async def test_compliance_technique_can_scan_pii_directly():
     """The 3rd-party Technique speaks its own Element protocol — verify directly."""
-    from agentkit_demo_compliance import CnPiiScanner
+    from aglet_demo_compliance import CnPiiScanner
 
     scanner = CnPiiScanner(config={"scan_field": "raw_input"})
     findings = await scanner.scan(

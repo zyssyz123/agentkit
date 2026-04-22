@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from agentkit.events import Event, EventBus, EventType
+from aglet.events import Event, EventBus, EventType
 
 
 @pytest.mark.asyncio

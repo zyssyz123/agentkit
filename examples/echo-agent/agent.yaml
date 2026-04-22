@@ -35,7 +35,7 @@ elements:
       - name: console
       - name: jsonl
         config:
-          directory: .agentkit/runs
+          directory: .aglet/runs
 
 budget:
   max_steps: 5
@@ -45,4 +45,4 @@ budget:
 
 store:
   type: jsonl
-  directory: .agentkit/runs
+  directory: .aglet/runs

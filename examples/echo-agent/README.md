@@ -13,12 +13,12 @@ perception.passthrough -> memory.sliding_window -> planner.echo
 ```bash
 # from the monorepo root
 uv sync
-uv run agentkit run examples/echo-agent/agent.yaml --input "hello, AgentKit!"
+uv run aglet run examples/echo-agent/agent.yaml --input "hello, Aglet!"
 ```
 
 Expected:
 
 * console events stream live during the run
-* the final answer (`Echo: hello, AgentKit!`) is printed
-* a per-run trace file appears under `.agentkit/runs/<run_id>.jsonl` (and a parallel
+* the final answer (`Echo: hello, Aglet!`) is printed
+* a per-run trace file appears under `.aglet/runs/<run_id>.jsonl` (and a parallel
   `<run_id>.events.jsonl` from the JSONL Observability Technique)

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from agentkit.context import AgentContext, ContextPatch
-from agentkit.hooks import HookManager, _glob_match, _is_valid_pattern
+from aglet.context import AgentContext, ContextPatch
+from aglet.hooks import HookManager, _glob_match, _is_valid_pattern
 
 
 def test_pattern_validation_accepts_canonical_shapes():

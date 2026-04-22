@@ -4,42 +4,42 @@ requires-python = ">=3.11"
 
 [manifest]
 members = [
-    "agentkit",
-    "agentkit-builtin-executor-sequential",
-    "agentkit-builtin-extensibility-hooks",
-    "agentkit-builtin-memory-rag",
-    "agentkit-builtin-memory-sliding-window",
-    "agentkit-builtin-model-litellm",
-    "agentkit-builtin-model-mock",
-    "agentkit-builtin-model-openai",
-    "agentkit-builtin-obs-console",
-    "agentkit-builtin-obs-jsonl",
-    "agentkit-builtin-obs-langfuse",
-    "agentkit-builtin-obs-otel",
-    "agentkit-builtin-output-streaming-text",
-    "agentkit-builtin-perception-passthrough",
-    "agentkit-builtin-planner-echo",
-    "agentkit-builtin-planner-react",
-    "agentkit-builtin-planner-reflexion",
-    "agentkit-builtin-planner-tot",
-    "agentkit-builtin-safety-budget",
-    "agentkit-builtin-tool-http-openapi",
-    "agentkit-builtin-tool-local-python",
-    "agentkit-builtin-tool-mcp",
-    "agentkit-builtin-tool-subagent",
-    "agentkit-cli",
-    "agentkit-demo-compliance",
-    "agentkit-demo-http-tool",
-    "agentkit-demo-subprocess-tool",
-    "agentkit-eval",
-    "agentkit-server",
-    "agentkit-workspace",
+    "aglet",
+    "aglet-builtin-executor-sequential",
+    "aglet-builtin-extensibility-hooks",
+    "aglet-builtin-memory-rag",
+    "aglet-builtin-memory-sliding-window",
+    "aglet-builtin-model-litellm",
+    "aglet-builtin-model-mock",
+    "aglet-builtin-model-openai",
+    "aglet-builtin-obs-console",
+    "aglet-builtin-obs-jsonl",
+    "aglet-builtin-obs-langfuse",
+    "aglet-builtin-obs-otel",
+    "aglet-builtin-output-streaming-text",
+    "aglet-builtin-perception-passthrough",
+    "aglet-builtin-planner-echo",
+    "aglet-builtin-planner-react",
+    "aglet-builtin-planner-reflexion",
+    "aglet-builtin-planner-tot",
+    "aglet-builtin-safety-budget",
+    "aglet-builtin-tool-http-openapi",
+    "aglet-builtin-tool-local-python",
+    "aglet-builtin-tool-mcp",
+    "aglet-builtin-tool-subagent",
+    "aglet-cli",
+    "aglet-demo-compliance",
+    "aglet-demo-http-tool",
+    "aglet-demo-subprocess-tool",
+    "aglet-eval",
+    "aglet-server",
+    "aglet-workspace",
 ]
 
 [[package]]
-name = "agentkit"
-version = "0.1.0"
-source = { editable = "packages/agentkit-core" }
+name = "aglet"
+version = "0.1.0a1"
+source = { editable = "packages/aglet" }
 dependencies = [
     { name = "anyio" },
     { name = "pydantic" },
@@ -54,139 +54,139 @@ requires-dist = [
 ]
 
 [[package]]
-name = "agentkit-builtin-executor-sequential"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/executor-sequential" }
+name = "aglet-builtin-executor-sequential"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/executor-sequential" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-extensibility-hooks"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/extensibility-hooks" }
+name = "aglet-builtin-extensibility-hooks"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/extensibility-hooks" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-memory-rag"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/memory-rag" }
+name = "aglet-builtin-memory-rag"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/memory-rag" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
     { name = "lancedb" },
     { name = "pyarrow" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "aglet", editable = "packages/aglet" },
     { name = "lancedb", specifier = ">=0.13" },
     { name = "pyarrow", specifier = ">=15" },
 ]
 
 [[package]]
-name = "agentkit-builtin-memory-sliding-window"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/memory-sliding-window" }
+name = "aglet-builtin-memory-sliding-window"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/memory-sliding-window" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-model-litellm"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/model-litellm" }
+name = "aglet-builtin-model-litellm"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/model-litellm" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
     { name = "litellm" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "aglet", editable = "packages/aglet" },
     { name = "litellm", specifier = ">=1.51" },
 ]
 
 [[package]]
-name = "agentkit-builtin-model-mock"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/model-mock" }
+name = "aglet-builtin-model-mock"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/model-mock" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-model-openai"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/model-openai" }
+name = "aglet-builtin-model-openai"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/model-openai" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
     { name = "httpx" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "aglet", editable = "packages/aglet" },
     { name = "httpx", specifier = ">=0.27" },
 ]
 
 [[package]]
-name = "agentkit-builtin-obs-console"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/obs-console" }
+name = "aglet-builtin-obs-console"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/obs-console" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-obs-jsonl"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/obs-jsonl" }
+name = "aglet-builtin-obs-jsonl"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/obs-jsonl" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-obs-langfuse"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/obs-langfuse" }
+name = "aglet-builtin-obs-langfuse"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/obs-langfuse" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
     { name = "langfuse" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "aglet", editable = "packages/aglet" },
     { name = "langfuse", specifier = ">=2.50" },
 ]
 
 [[package]]
-name = "agentkit-builtin-obs-otel"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/obs-otel" }
+name = "aglet-builtin-obs-otel"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/obs-otel" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
     { name = "opentelemetry-api" },
     { name = "opentelemetry-exporter-otlp-proto-http" },
     { name = "opentelemetry-sdk" },
@@ -194,203 +194,203 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "aglet", editable = "packages/aglet" },
     { name = "opentelemetry-api", specifier = ">=1.27" },
     { name = "opentelemetry-exporter-otlp-proto-http", specifier = ">=1.27" },
     { name = "opentelemetry-sdk", specifier = ">=1.27" },
 ]
 
 [[package]]
-name = "agentkit-builtin-output-streaming-text"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/output-streaming-text" }
+name = "aglet-builtin-output-streaming-text"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/output-streaming-text" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-perception-passthrough"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/perception-passthrough" }
+name = "aglet-builtin-perception-passthrough"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/perception-passthrough" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-planner-echo"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/planner-echo" }
+name = "aglet-builtin-planner-echo"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/planner-echo" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-planner-react"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/planner-react" }
+name = "aglet-builtin-planner-react"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/planner-react" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-planner-reflexion"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/planner-reflexion" }
+name = "aglet-builtin-planner-reflexion"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/planner-reflexion" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-planner-tot"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/planner-tot" }
+name = "aglet-builtin-planner-tot"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/planner-tot" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-safety-budget"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/safety-budget" }
+name = "aglet-builtin-safety-budget"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/safety-budget" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-tool-http-openapi"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/tool-http-openapi" }
+name = "aglet-builtin-tool-http-openapi"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/tool-http-openapi" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
     { name = "httpx" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "aglet", editable = "packages/aglet" },
     { name = "httpx", specifier = ">=0.27" },
 ]
 
 [[package]]
-name = "agentkit-builtin-tool-local-python"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/tool-local-python" }
+name = "aglet-builtin-tool-local-python"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/tool-local-python" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-builtin-tool-mcp"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/tool-mcp" }
+name = "aglet-builtin-tool-mcp"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/tool-mcp" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
     { name = "mcp" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "aglet", editable = "packages/aglet" },
     { name = "mcp", specifier = ">=1.0" },
 ]
 
 [[package]]
-name = "agentkit-builtin-tool-subagent"
-version = "0.1.0"
-source = { editable = "packages/agentkit-builtin/tool-subagent" }
+name = "aglet-builtin-tool-subagent"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-builtin/tool-subagent" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-cli"
-version = "0.1.0"
-source = { editable = "packages/agentkit-cli" }
+name = "aglet-cli"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-cli" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
     { name = "rich" },
     { name = "typer" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "aglet", editable = "packages/aglet" },
     { name = "rich", specifier = ">=13.7" },
     { name = "typer", specifier = ">=0.12" },
 ]
 
 [[package]]
-name = "agentkit-demo-compliance"
+name = "aglet-demo-compliance"
 version = "0.1.0"
 source = { editable = "examples/third-party-element-demo" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-demo-http-tool"
+name = "aglet-demo-http-tool"
 version = "0.1.0"
 source = { editable = "examples/http-plugin-demo" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
     { name = "fastapi" },
     { name = "uvicorn" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "aglet", editable = "packages/aglet" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "uvicorn", specifier = ">=0.30" },
 ]
 
 [[package]]
-name = "agentkit-demo-subprocess-tool"
+name = "aglet-demo-subprocess-tool"
 version = "0.1.0"
 source = { editable = "examples/subprocess-plugin-demo" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "agentkit", editable = "packages/agentkit-core" }]
+requires-dist = [{ name = "aglet", editable = "packages/aglet" }]
 
 [[package]]
-name = "agentkit-eval"
-version = "0.1.0"
-source = { editable = "packages/agentkit-eval" }
+name = "aglet-eval"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-eval" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
     { name = "pyyaml" },
     { name = "rich" },
     { name = "typer" },
@@ -398,18 +398,18 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "aglet", editable = "packages/aglet" },
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "rich", specifier = ">=13.7" },
     { name = "typer", specifier = ">=0.12" },
 ]
 
 [[package]]
-name = "agentkit-server"
-version = "0.1.0"
-source = { editable = "packages/agentkit-server" }
+name = "aglet-server"
+version = "0.1.0a1"
+source = { editable = "packages/aglet-server" }
 dependencies = [
-    { name = "agentkit" },
+    { name = "aglet" },
     { name = "fastapi" },
     { name = "sse-starlette" },
     { name = "uvicorn", extra = ["standard"] },
@@ -417,95 +417,95 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "agentkit", editable = "packages/agentkit-core" },
+    { name = "aglet", editable = "packages/aglet" },
     { name = "fastapi", specifier = ">=0.115" },
     { name = "sse-starlette", specifier = ">=2.1" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.30" },
 ]
 
 [[package]]
-name = "agentkit-workspace"
+name = "aglet-workspace"
 version = "0.2.0"
 source = { virtual = "." }
 
 [package.dev-dependencies]
 dev = [
-    { name = "agentkit" },
-    { name = "agentkit-builtin-executor-sequential" },
-    { name = "agentkit-builtin-extensibility-hooks" },
-    { name = "agentkit-builtin-memory-rag" },
-    { name = "agentkit-builtin-memory-sliding-window" },
-    { name = "agentkit-builtin-model-mock" },
-    { name = "agentkit-builtin-model-openai" },
-    { name = "agentkit-builtin-obs-console" },
-    { name = "agentkit-builtin-obs-jsonl" },
-    { name = "agentkit-builtin-obs-otel" },
-    { name = "agentkit-builtin-output-streaming-text" },
-    { name = "agentkit-builtin-perception-passthrough" },
-    { name = "agentkit-builtin-planner-echo" },
-    { name = "agentkit-builtin-planner-react" },
-    { name = "agentkit-builtin-planner-reflexion" },
-    { name = "agentkit-builtin-planner-tot" },
-    { name = "agentkit-builtin-safety-budget" },
-    { name = "agentkit-builtin-tool-http-openapi" },
-    { name = "agentkit-builtin-tool-local-python" },
-    { name = "agentkit-builtin-tool-mcp" },
-    { name = "agentkit-builtin-tool-subagent" },
-    { name = "agentkit-cli" },
-    { name = "agentkit-demo-compliance" },
-    { name = "agentkit-demo-http-tool" },
-    { name = "agentkit-demo-subprocess-tool" },
-    { name = "agentkit-eval" },
-    { name = "agentkit-server" },
+    { name = "aglet" },
+    { name = "aglet-builtin-executor-sequential" },
+    { name = "aglet-builtin-extensibility-hooks" },
+    { name = "aglet-builtin-memory-rag" },
+    { name = "aglet-builtin-memory-sliding-window" },
+    { name = "aglet-builtin-model-mock" },
+    { name = "aglet-builtin-model-openai" },
+    { name = "aglet-builtin-obs-console" },
+    { name = "aglet-builtin-obs-jsonl" },
+    { name = "aglet-builtin-obs-otel" },
+    { name = "aglet-builtin-output-streaming-text" },
+    { name = "aglet-builtin-perception-passthrough" },
+    { name = "aglet-builtin-planner-echo" },
+    { name = "aglet-builtin-planner-react" },
+    { name = "aglet-builtin-planner-reflexion" },
+    { name = "aglet-builtin-planner-tot" },
+    { name = "aglet-builtin-safety-budget" },
+    { name = "aglet-builtin-tool-http-openapi" },
+    { name = "aglet-builtin-tool-local-python" },
+    { name = "aglet-builtin-tool-mcp" },
+    { name = "aglet-builtin-tool-subagent" },
+    { name = "aglet-cli" },
+    { name = "aglet-demo-compliance" },
+    { name = "aglet-demo-http-tool" },
+    { name = "aglet-demo-subprocess-tool" },
+    { name = "aglet-eval" },
+    { name = "aglet-server" },
     { name = "httpx" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
     { name = "ruff" },
 ]
 heavy = [
-    { name = "agentkit-builtin-model-litellm" },
-    { name = "agentkit-builtin-obs-langfuse" },
+    { name = "aglet-builtin-model-litellm" },
+    { name = "aglet-builtin-obs-langfuse" },
 ]
 
 [package.metadata]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "agentkit", editable = "packages/agentkit-core" },
-    { name = "agentkit-builtin-executor-sequential", editable = "packages/agentkit-builtin/executor-sequential" },
-    { name = "agentkit-builtin-extensibility-hooks", editable = "packages/agentkit-builtin/extensibility-hooks" },
-    { name = "agentkit-builtin-memory-rag", editable = "packages/agentkit-builtin/memory-rag" },
-    { name = "agentkit-builtin-memory-sliding-window", editable = "packages/agentkit-builtin/memory-sliding-window" },
-    { name = "agentkit-builtin-model-mock", editable = "packages/agentkit-builtin/model-mock" },
-    { name = "agentkit-builtin-model-openai", editable = "packages/agentkit-builtin/model-openai" },
-    { name = "agentkit-builtin-obs-console", editable = "packages/agentkit-builtin/obs-console" },
-    { name = "agentkit-builtin-obs-jsonl", editable = "packages/agentkit-builtin/obs-jsonl" },
-    { name = "agentkit-builtin-obs-otel", editable = "packages/agentkit-builtin/obs-otel" },
-    { name = "agentkit-builtin-output-streaming-text", editable = "packages/agentkit-builtin/output-streaming-text" },
-    { name = "agentkit-builtin-perception-passthrough", editable = "packages/agentkit-builtin/perception-passthrough" },
-    { name = "agentkit-builtin-planner-echo", editable = "packages/agentkit-builtin/planner-echo" },
-    { name = "agentkit-builtin-planner-react", editable = "packages/agentkit-builtin/planner-react" },
-    { name = "agentkit-builtin-planner-reflexion", editable = "packages/agentkit-builtin/planner-reflexion" },
-    { name = "agentkit-builtin-planner-tot", editable = "packages/agentkit-builtin/planner-tot" },
-    { name = "agentkit-builtin-safety-budget", editable = "packages/agentkit-builtin/safety-budget" },
-    { name = "agentkit-builtin-tool-http-openapi", editable = "packages/agentkit-builtin/tool-http-openapi" },
-    { name = "agentkit-builtin-tool-local-python", editable = "packages/agentkit-builtin/tool-local-python" },
-    { name = "agentkit-builtin-tool-mcp", editable = "packages/agentkit-builtin/tool-mcp" },
-    { name = "agentkit-builtin-tool-subagent", editable = "packages/agentkit-builtin/tool-subagent" },
-    { name = "agentkit-cli", editable = "packages/agentkit-cli" },
-    { name = "agentkit-demo-compliance", editable = "examples/third-party-element-demo" },
-    { name = "agentkit-demo-http-tool", editable = "examples/http-plugin-demo" },
-    { name = "agentkit-demo-subprocess-tool", editable = "examples/subprocess-plugin-demo" },
-    { name = "agentkit-eval", editable = "packages/agentkit-eval" },
-    { name = "agentkit-server", editable = "packages/agentkit-server" },
+    { name = "aglet", editable = "packages/aglet" },
+    { name = "aglet-builtin-executor-sequential", editable = "packages/aglet-builtin/executor-sequential" },
+    { name = "aglet-builtin-extensibility-hooks", editable = "packages/aglet-builtin/extensibility-hooks" },
+    { name = "aglet-builtin-memory-rag", editable = "packages/aglet-builtin/memory-rag" },
+    { name = "aglet-builtin-memory-sliding-window", editable = "packages/aglet-builtin/memory-sliding-window" },
+    { name = "aglet-builtin-model-mock", editable = "packages/aglet-builtin/model-mock" },
+    { name = "aglet-builtin-model-openai", editable = "packages/aglet-builtin/model-openai" },
+    { name = "aglet-builtin-obs-console", editable = "packages/aglet-builtin/obs-console" },
+    { name = "aglet-builtin-obs-jsonl", editable = "packages/aglet-builtin/obs-jsonl" },
+    { name = "aglet-builtin-obs-otel", editable = "packages/aglet-builtin/obs-otel" },
+    { name = "aglet-builtin-output-streaming-text", editable = "packages/aglet-builtin/output-streaming-text" },
+    { name = "aglet-builtin-perception-passthrough", editable = "packages/aglet-builtin/perception-passthrough" },
+    { name = "aglet-builtin-planner-echo", editable = "packages/aglet-builtin/planner-echo" },
+    { name = "aglet-builtin-planner-react", editable = "packages/aglet-builtin/planner-react" },
+    { name = "aglet-builtin-planner-reflexion", editable = "packages/aglet-builtin/planner-reflexion" },
+    { name = "aglet-builtin-planner-tot", editable = "packages/aglet-builtin/planner-tot" },
+    { name = "aglet-builtin-safety-budget", editable = "packages/aglet-builtin/safety-budget" },
+    { name = "aglet-builtin-tool-http-openapi", editable = "packages/aglet-builtin/tool-http-openapi" },
+    { name = "aglet-builtin-tool-local-python", editable = "packages/aglet-builtin/tool-local-python" },
+    { name = "aglet-builtin-tool-mcp", editable = "packages/aglet-builtin/tool-mcp" },
+    { name = "aglet-builtin-tool-subagent", editable = "packages/aglet-builtin/tool-subagent" },
+    { name = "aglet-cli", editable = "packages/aglet-cli" },
+    { name = "aglet-demo-compliance", editable = "examples/third-party-element-demo" },
+    { name = "aglet-demo-http-tool", editable = "examples/http-plugin-demo" },
+    { name = "aglet-demo-subprocess-tool", editable = "examples/subprocess-plugin-demo" },
+    { name = "aglet-eval", editable = "packages/aglet-eval" },
+    { name = "aglet-server", editable = "packages/aglet-server" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "pytest", specifier = ">=8.0" },
     { name = "pytest-asyncio", specifier = ">=0.23" },
     { name = "ruff", specifier = ">=0.6" },
 ]
 heavy = [
-    { name = "agentkit-builtin-model-litellm", editable = "packages/agentkit-builtin/model-litellm" },
-    { name = "agentkit-builtin-obs-langfuse", editable = "packages/agentkit-builtin/obs-langfuse" },
+    { name = "aglet-builtin-model-litellm", editable = "packages/aglet-builtin/model-litellm" },
+    { name = "aglet-builtin-obs-langfuse", editable = "packages/aglet-builtin/obs-langfuse" },
 ]
 
 [[package]]

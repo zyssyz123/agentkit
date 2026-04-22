@@ -21,8 +21,8 @@ venv/
 .coverage
 htmlcov/
 
-# AgentKit runtime artifacts
-.agentkit/
+# Aglet runtime artifacts
+.aglet/
 
 # IDE
 .vscode/
@@ -31,3 +31,6 @@ htmlcov/
 
 # OS
 .DS_Store
+
+# Build outputs (kept locally; published to PyPI not committed)
+dist/

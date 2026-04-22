@@ -30,12 +30,12 @@ elements:
         config: { max_messages: 20 }
       - name: rag
         config:
-          uri: ./.agentkit/research-vec
+          uri: ./.aglet/research-vec
           table: research
           embedder: embedder
           top_k: 4
           seed:
-            - "AgentKit splits Agent design into 9 Elements and unlimited Techniques."
+            - "Aglet splits Agent design into 9 Elements and unlimited Techniques."
             - "Every Element and Technique is a swappable plugin via PyPI entry-points."
             - "Third parties can introduce wholly new Elements (e.g. compliance, emotion)."
     routing: parallel_merge
@@ -56,14 +56,14 @@ elements:
         config:
           tools:
             - name: now_iso
-              import: agentkit_builtin_tool_local_python.demo:now_iso
+              import: aglet_builtin_tool_local_python.demo:now_iso
               description: Return the current UTC timestamp as ISO-8601.
               parameters_schema:
                 type: object
                 properties: {}
                 additionalProperties: false
             - name: echo
-              import: agentkit_builtin_tool_local_python.demo:echo
+              import: aglet_builtin_tool_local_python.demo:echo
               description: Echo the given text back verbatim.
               parameters_schema:
                 type: object
@@ -88,7 +88,7 @@ elements:
     techniques:
       - name: console
       - name: jsonl
-        config: { directory: .agentkit/runs }
+        config: { directory: .aglet/runs }
 
 budget:
   max_steps: 8
@@ -98,4 +98,4 @@ budget:
 
 store:
   type: jsonl
-  directory: .agentkit/runs
+  directory: .aglet/runs

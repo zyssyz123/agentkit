@@ -10,9 +10,9 @@ import textwrap
 
 import pytest
 
-from agentkit.config import load_agent_config
-from agentkit.events import EventType
-from agentkit.runtime import Runtime
+from aglet.config import load_agent_config
+from aglet.events import EventType
+from aglet.runtime import Runtime
 
 
 HOOKED_AGENT = textwrap.dedent(
@@ -25,7 +25,7 @@ HOOKED_AGENT = textwrap.dedent(
         config:
           script:
             - content: "calling reverse_text"
-              tool_calls: [{ id: c1, name: reverse_text, arguments: { text: "AgentKit" } }]
+              tool_calls: [{ id: c1, name: reverse_text, arguments: { text: "Aglet" } }]
             - content: "Done"
     models:
       default: mock/anything
@@ -43,7 +43,7 @@ HOOKED_AGENT = textwrap.dedent(
             config:
               tools:
                 - name: reverse_text
-                  import: agentkit_demo_subprocess_tool:_inproc_reverse
+                  import: aglet_demo_subprocess_tool:_inproc_reverse
                   description: Reverse a string
                   parameters_schema:
                     type: object
@@ -71,8 +71,8 @@ HOOKED_AGENT = textwrap.dedent(
 
 
 # Inject a tiny in-process function under the demo plugin's namespace so the
-# local_python tool can resolve `agentkit_demo_subprocess_tool:_inproc_reverse`.
-import agentkit_demo_subprocess_tool as _demo_pkg  # noqa: E402
+# local_python tool can resolve `aglet_demo_subprocess_tool:_inproc_reverse`.
+import aglet_demo_subprocess_tool as _demo_pkg  # noqa: E402
 
 
 def _inproc_reverse(text: str) -> str:
@@ -137,7 +137,7 @@ async def test_hook_invalid_pattern_rejected_at_setup(tmp_path):
 
 
 def _empty_ctx(run_id: str):
-    from agentkit.budget import Budget
-    from agentkit.context import AgentContext, RawInput
+    from aglet.budget import Budget
+    from aglet.context import AgentContext, RawInput
 
     return AgentContext(run_id=run_id, raw_input=RawInput(), budget=Budget())

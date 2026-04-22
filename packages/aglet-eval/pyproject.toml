@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "aglet-eval"
+version = "0.1.0a1"
+description = "Declarative evaluation harness for Aglet agents (suite.yaml -> pass-rate / latency / cost report)."
+authors = [{ name = "The Aglet Contributors" }]
+license = "Apache-2.0"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "aglet>=0.1.0a1",
+    "pyyaml>=6.0",
+    "rich>=13.7",
+    "typer>=0.12",
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.scripts]
+aglet-eval = "aglet_eval.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/zyssyz123/agentkit"
+Repository = "https://github.com/zyssyz123/agentkit"
+Issues = "https://github.com/zyssyz123/agentkit/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aglet_eval"]

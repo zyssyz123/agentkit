@@ -6,10 +6,10 @@ import textwrap
 
 import pytest
 
-from agentkit.config import load_agent_config
-from agentkit.context import Message
-from agentkit.events import EventType
-from agentkit.runtime import Runtime
+from aglet.config import load_agent_config
+from aglet.context import Message
+from aglet.events import EventType
+from aglet.runtime import Runtime
 
 AGENT_YAML = textwrap.dedent(
     """\
@@ -54,7 +54,7 @@ async def test_runtime_appends_user_message_to_supplied_history(tmp_path):
     assert captured_run_id is not None
 
     # Re-build the final context from stored patches and inspect history.
-    from agentkit.context import AgentContext, Budget, RawInput
+    from aglet.context import AgentContext, Budget, RawInput
 
     base = AgentContext(
         run_id=captured_run_id,

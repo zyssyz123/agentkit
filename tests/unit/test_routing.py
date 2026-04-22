@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import pytest
 
-from agentkit.context import ContextPatch
-from agentkit.routing import (
+from aglet.context import ContextPatch
+from aglet.routing import (
     AllStrategy,
     FirstMatchStrategy,
     ParallelMergeStrategy,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-from agentkit.config import expand_env, load_agent_config
+from aglet.config import expand_env, load_agent_config
 
 
 def test_expand_env_simple(monkeypatch):

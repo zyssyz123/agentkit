@@ -6,7 +6,7 @@ import textwrap
 
 import pytest
 
-from agentkit_eval import load_suite, run_suite
+from aglet_eval import load_suite, run_suite
 
 AGENT_YAML = textwrap.dedent(
     """\

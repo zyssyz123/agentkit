@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import time
 
-from agentkit.budget import Budget
+from aglet.budget import Budget
 
 
 def test_zero_means_unlimited_for_each_dimension():

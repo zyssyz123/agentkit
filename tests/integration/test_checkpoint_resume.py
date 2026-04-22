@@ -7,10 +7,10 @@ from pathlib import Path
 
 import pytest
 
-from agentkit.config import load_agent_config
-from agentkit.events import EventType
-from agentkit.runtime import Runtime
-from agentkit.store import JsonlContextStore
+from aglet.config import load_agent_config
+from aglet.events import EventType
+from aglet.runtime import Runtime
+from aglet.store import JsonlContextStore
 
 
 @pytest.mark.asyncio
@@ -92,7 +92,7 @@ async def test_jsonl_store_list_runs(tmp_path: Path):
     store = JsonlContextStore(tmp_path / "runs")
     assert await store.list_runs() == []
     # Force a run by appending a stub patch.
-    from agentkit.context import ContextPatch
+    from aglet.context import ContextPatch
 
     await store.append_patch("abc-1", ContextPatch(changes={"metadata": {"k": 1}}))
     await store.append_patch("abc-2", ContextPatch(changes={"metadata": {"k": 2}}))

@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from agentkit_server import build_app
+from aglet_server import build_app
 
 ECHO_AGENT_YAML = Path(__file__).resolve().parents[2] / "examples" / "echo-agent" / "agent.yaml"
 
@@ -18,7 +18,7 @@ ECHO_AGENT_YAML = Path(__file__).resolve().parents[2] / "examples" / "echo-agent
 def client(tmp_path):
     # Tweak the run directories to avoid polluting cwd.
     yaml_text = ECHO_AGENT_YAML.read_text(encoding="utf-8").replace(
-        ".agentkit/runs", str(tmp_path / "runs")
+        ".aglet/runs", str(tmp_path / "runs")
     )
     target = tmp_path / "agent.yaml"
     target.write_text(yaml_text, encoding="utf-8")

@@ -1,11 +1,11 @@
 """Conformance suite — every registered Technique must satisfy a minimum contract.
 
 Plugin authors should run this against their own packages before publishing. Failing
-tests indicate the Technique cannot interoperate cleanly with the rest of AgentKit.
+tests indicate the Technique cannot interoperate cleanly with the rest of Aglet.
 
 Checks (per Technique):
 
-1. Discoverable via :class:`agentkit.registry.Registry` entry-points.
+1. Discoverable via :class:`aglet.registry.Registry` entry-points.
 2. Factory accepts an empty ``config={}`` and returns a Component instance.
 3. Instance exposes the canonical attributes: ``name``, ``element``, ``capabilities``,
    ``version`` and the lifecycle methods ``setup`` / ``teardown`` / ``health``.
@@ -21,8 +21,8 @@ from collections.abc import Callable
 
 import pytest
 
-from agentkit.protocols import BootContext
-from agentkit.registry import get_registry
+from aglet.protocols import BootContext
+from aglet.registry import get_registry
 
 # Per-Element method-name expectations.
 ELEMENT_REQUIRED_METHODS: dict[str, tuple[str, ...]] = {

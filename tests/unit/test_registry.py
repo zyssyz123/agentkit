@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from agentkit.registry import Registry
+from aglet.registry import Registry
 
 
 def test_register_and_get_technique_factory():

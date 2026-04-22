@@ -3,15 +3,15 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "agentkit-demo-subprocess-tool"
+name = "aglet-demo-subprocess-tool"
 version = "0.1.0"
 description = "Demo subprocess plugin: a Tool Technique that runs in its own Python process and talks JSON-RPC over stdio."
 license = "Apache-2.0"
 requires-python = ">=3.11"
-dependencies = ["agentkit>=0.1.0"]
+dependencies = ["aglet>=0.1.0"]
 
 [project.scripts]
-agentkit-demo-subprocess-tool = "agentkit_demo_subprocess_tool.__main__:main"
+aglet-demo-subprocess-tool = "aglet_demo_subprocess_tool.__main__:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/agentkit_demo_subprocess_tool"]
+packages = ["src/aglet_demo_subprocess_tool"]

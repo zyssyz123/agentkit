@@ -6,7 +6,7 @@ from dataclasses import replace
 
 import pytest
 
-from agentkit.context import AgentContext, ContextPatch, MemoryItem, Message, ParsedInput
+from aglet.context import AgentContext, ContextPatch, MemoryItem, Message, ParsedInput
 
 
 def test_context_is_immutable():

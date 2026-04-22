@@ -7,14 +7,14 @@ import sys
 
 import pytest
 
-from agentkit.loader.subprocess import load_subprocess_plugin
+from aglet.loader.subprocess import load_subprocess_plugin
 
 
 @pytest.mark.asyncio
 async def test_subprocess_plugin_spawn_invoke_shutdown():
     # Use the same Python interpreter so workspace deps are visible.
     rt, proxies = await load_subprocess_plugin(
-        [sys.executable, "-m", "agentkit_demo_subprocess_tool"]
+        [sys.executable, "-m", "aglet_demo_subprocess_tool"]
     )
     try:
         assert len(proxies) == 1
@@ -44,9 +44,9 @@ async def test_runtime_loads_subprocess_plugin_via_external_plugins(tmp_path):
     """The Runtime auto-bootstraps subprocess plugins declared under external_plugins."""
     import textwrap
 
-    from agentkit.config import load_agent_config
-    from agentkit.events import EventType
-    from agentkit.runtime import Runtime
+    from aglet.config import load_agent_config
+    from aglet.events import EventType
+    from aglet.runtime import Runtime
 
     yaml_path = tmp_path / "agent.yaml"
     yaml_path.write_text(
@@ -68,7 +68,7 @@ async def test_runtime_loads_subprocess_plugin_via_external_plugins(tmp_path):
             external_plugins:
               - name: reverse-tool
                 runtime: subprocess
-                command: ["{sys.executable}", "-m", "agentkit_demo_subprocess_tool"]
+                command: ["{sys.executable}", "-m", "aglet_demo_subprocess_tool"]
                 components:
                   - {{ element: tool, name: reverse, capabilities: [list, invoke] }}
 

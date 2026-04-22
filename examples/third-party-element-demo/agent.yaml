@@ -2,7 +2,7 @@ schema_version: "1.0"
 name: compliance-demo-agent
 description: |
   An echo-style agent that ALSO uses a third-party-contributed Element ('compliance').
-  This proves AgentKit's two-dimensional pluggability: a 3rd-party plugin contributes
+  This proves Aglet's two-dimensional pluggability: a 3rd-party plugin contributes
   BOTH a brand-new Element kind AND a Technique implementing it, all via PyPI entry-points.
 
 elements:
@@ -44,4 +44,4 @@ budget:
 
 store:
   type: memory
-  directory: .agentkit/runs
+  directory: .aglet/runs
