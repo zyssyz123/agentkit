@@ -1,6 +1,6 @@
 [project]
 name = "agentkit-workspace"
-version = "0.1.0"
+version = "0.2.0"
 description = "AgentKit monorepo workspace root (not published)."
 requires-python = ">=3.11"
 
@@ -8,40 +8,65 @@ requires-python = ">=3.11"
 members = [
     "packages/agentkit-core",
     "packages/agentkit-cli",
+    "packages/agentkit-server",
     "packages/agentkit-builtin/*",
 ]
 
 [tool.uv.sources]
 agentkit = { workspace = true }
 agentkit-cli = { workspace = true }
+agentkit-server = { workspace = true }
 agentkit-builtin-perception-passthrough = { workspace = true }
 agentkit-builtin-memory-sliding-window = { workspace = true }
+agentkit-builtin-memory-rag = { workspace = true }
 agentkit-builtin-planner-echo = { workspace = true }
+agentkit-builtin-planner-react = { workspace = true }
 agentkit-builtin-tool-local-python = { workspace = true }
 agentkit-builtin-tool-http-openapi = { workspace = true }
+agentkit-builtin-tool-mcp = { workspace = true }
 agentkit-builtin-executor-sequential = { workspace = true }
 agentkit-builtin-safety-budget = { workspace = true }
 agentkit-builtin-output-streaming-text = { workspace = true }
 agentkit-builtin-obs-console = { workspace = true }
 agentkit-builtin-obs-jsonl = { workspace = true }
+agentkit-builtin-obs-otel = { workspace = true }
+agentkit-builtin-obs-langfuse = { workspace = true }
+agentkit-builtin-model-openai = { workspace = true }
+agentkit-builtin-model-litellm = { workspace = true }
+agentkit-builtin-model-mock = { workspace = true }
 
 [dependency-groups]
 dev = [
     "agentkit",
     "agentkit-cli",
+    "agentkit-server",
     "agentkit-builtin-perception-passthrough",
     "agentkit-builtin-memory-sliding-window",
+    "agentkit-builtin-memory-rag",
     "agentkit-builtin-planner-echo",
+    "agentkit-builtin-planner-react",
     "agentkit-builtin-tool-local-python",
     "agentkit-builtin-tool-http-openapi",
+    "agentkit-builtin-tool-mcp",
     "agentkit-builtin-executor-sequential",
     "agentkit-builtin-safety-budget",
     "agentkit-builtin-output-streaming-text",
     "agentkit-builtin-obs-console",
     "agentkit-builtin-obs-jsonl",
+    "agentkit-builtin-obs-otel",
+    "agentkit-builtin-model-openai",
+    "agentkit-builtin-model-mock",
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
+    "httpx>=0.27",
     "ruff>=0.6",
+]
+
+# Heavyweight optional builtins (litellm, langfuse) live in their own group so the dev
+# install stays light. Enable with: `uv sync --group heavy`.
+heavy = [
+    "agentkit-builtin-model-litellm",
+    "agentkit-builtin-obs-langfuse",
 ]
 
 [tool.ruff]

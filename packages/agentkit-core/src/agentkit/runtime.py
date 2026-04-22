@@ -40,6 +40,8 @@ from agentkit.hub import (
     SafetyHost,
     ToolHostImpl,
 )
+from agentkit.models import ModelHub
+from agentkit.protocols import BootContext
 from agentkit.registry import Registry, get_registry
 from agentkit.routing import get_strategy
 from agentkit.store import ContextStore, JsonlContextStore
@@ -55,6 +57,7 @@ class Runtime:
     bus: EventBus
     store: ContextStore
     config: AgentConfig
+    models: ModelHub
 
     # ---------- factories ---------------------------------------------------------------------
 
@@ -74,7 +77,8 @@ class Runtime:
         # Always discover entry points so installed packages register themselves.
         registry.discover_entry_points()
 
-        hub = _build_hub(cfg, registry)
+        models = _build_model_hub(cfg)
+        hub = _build_hub(cfg, registry, models)
         bus = EventBus()
 
         if store is None:
@@ -92,7 +96,7 @@ class Runtime:
 
         bus.subscribe(_fan_out)
 
-        return cls(hub=hub, bus=bus, store=store, config=cfg)
+        return cls(hub=hub, bus=bus, store=store, config=cfg, models=models)
 
     # ---------- public API --------------------------------------------------------------------
 
@@ -138,6 +142,16 @@ class Runtime:
             yield await emit(
                 Event(type=EventType.MEMORY_RECALLED, element="memory", patch=patch)
             )
+
+            # 2b. Discover tools so the Planner can advertise them to the LLM.
+            tool_specs = await self.hub.tool.list_tools()
+            if tool_specs:
+                tool_patch = ContextPatch(
+                    changes={"available_tools": tool_specs},
+                    source_element="tool",
+                    source_technique="hub",
+                )
+                ctx = await self._apply(ctx, tool_patch, "tool")
 
             # 3. Plan / execute loop
             while True:
@@ -258,7 +272,30 @@ class Runtime:
 # ---------- private helpers ------------------------------------------------------------------
 
 
-def _build_hub(cfg: AgentConfig, registry: Registry) -> ElementHub:
+def _build_model_hub(cfg: AgentConfig) -> ModelHub:
+    hub = ModelHub()
+    factories = ModelHub.discover_factories()
+    for prov_cfg in cfg.providers:
+        factory = factories.get(prov_cfg.type)
+        if factory is None:
+            raise ValueError(
+                f"Provider '{prov_cfg.name}' references unknown ModelProvider type "
+                f"'{prov_cfg.type}'. Discovered: {sorted(factories)}"
+            )
+        try:
+            instance = factory(config=prov_cfg.config)
+        except TypeError:
+            try:
+                instance = factory(prov_cfg.config)
+            except TypeError:
+                instance = factory()
+        hub.register(prov_cfg.name, prov_cfg.type, instance)
+    for alias, qualified in cfg.models.items():
+        hub.set_alias(alias, qualified)
+    return hub
+
+
+def _build_hub(cfg: AgentConfig, registry: Registry, models: ModelHub) -> ElementHub:
     hub = ElementHub()
 
     host_map: dict[str, object] = {
@@ -290,18 +327,31 @@ def _build_hub(cfg: AgentConfig, registry: Registry) -> ElementHub:
                     f"Element '{element_name}' configured with unknown technique "
                     f"'{tech_cfg.name}'. {exc}"
                 ) from exc
-            try:
-                instance = factory(config=tech_cfg.config)
-            except TypeError:
-                try:
-                    instance = factory(tech_cfg.config)
-                except TypeError:
-                    instance = factory()
+            instance = _instantiate_technique(factory, tech_cfg.config, models)
             host.add(instance)  # type: ignore[union-attr]
 
         host.routing = get_strategy(element_cfg.routing)  # type: ignore[union-attr]
 
     return hub
+
+
+def _instantiate_technique(factory, config: dict, models: ModelHub):
+    """Instantiate a Technique factory tolerantly: accept models / config kwargs as available."""
+    boot = BootContext(config=config, models=models)
+    # Try richest signature first.
+    for kwargs in (
+        {"config": config, "models": models},
+        {"boot": boot},
+        {"config": config},
+    ):
+        try:
+            return factory(**kwargs)
+        except TypeError:
+            continue
+    try:
+        return factory(config)
+    except TypeError:
+        return factory()
 
 
 def _attach_run(event: Event, run_id: str) -> Event:

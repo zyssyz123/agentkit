@@ -42,6 +42,16 @@ class StoreConfig(BaseModel):
     directory: str = ".agentkit/runs"
 
 
+class ProviderConfig(BaseModel):
+    """One ModelProvider declaration in agent.yaml `providers:`."""
+
+    model_config = ConfigDict(extra="allow")
+
+    name: str
+    type: str  # entry-point name under "agentkit.models"
+    config: dict[str, Any] = Field(default_factory=dict)
+
+
 class AgentConfig(BaseModel):
     model_config = ConfigDict(extra="allow")
 
@@ -51,7 +61,11 @@ class AgentConfig(BaseModel):
 
     elements: dict[str, ElementConfig] = Field(default_factory=dict)
     budget: BudgetConfig = Field(default_factory=BudgetConfig)
+
+    providers: list[ProviderConfig] = Field(default_factory=list)
+    # alias -> "<provider>/<model_id>"
     models: dict[str, str] = Field(default_factory=dict)
+
     hooks: list[HookConfig] = Field(default_factory=list)
     store: StoreConfig = Field(default_factory=StoreConfig)
 

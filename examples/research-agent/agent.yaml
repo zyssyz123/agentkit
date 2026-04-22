@@ -1,0 +1,101 @@
+schema_version: "1.0"
+name: research-agent
+description: |
+  M2 end-to-end demo. ReAct planner + RAG memory + local Python tools, all
+  driven by an OpenAI-compatible model provider. Set OPENAI_API_KEY in your
+  environment to use OpenAI; or override base_url to hit any OpenAI-compatible
+  endpoint (Together, Groq, DeepSeek, Ollama-OAI, vLLM, etc.).
+
+# ----- Model providers -----
+providers:
+  - name: openai
+    type: openai_compat
+    config:
+      api_key: ${OPENAI_API_KEY}
+      base_url: ${OPENAI_BASE_URL:-https://api.openai.com/v1}
+
+models:
+  default:  openai/gpt-4o-mini
+  embedder: openai/text-embedding-3-small
+
+# ----- Elements -----
+elements:
+  perception:
+    techniques:
+      - name: passthrough
+
+  memory:
+    techniques:
+      - name: sliding_window
+        config: { max_messages: 20 }
+      - name: rag
+        config:
+          uri: ./.agentkit/research-vec
+          table: research
+          embedder: embedder
+          top_k: 4
+          seed:
+            - "AgentKit splits Agent design into 9 Elements and unlimited Techniques."
+            - "Every Element and Technique is a swappable plugin via PyPI entry-points."
+            - "Third parties can introduce wholly new Elements (e.g. compliance, emotion)."
+    routing: parallel_merge
+
+  planner:
+    techniques:
+      - name: react
+        config:
+          model: default
+          temperature: 0.2
+          system_prompt: |
+            You are a concise research assistant. You can call tools to gather facts.
+            When you have enough information, produce the final answer.
+
+  tool:
+    techniques:
+      - name: local_python
+        config:
+          tools:
+            - name: now_iso
+              import: agentkit_builtin_tool_local_python.demo:now_iso
+              description: Return the current UTC timestamp as ISO-8601.
+              parameters_schema:
+                type: object
+                properties: {}
+                additionalProperties: false
+            - name: echo
+              import: agentkit_builtin_tool_local_python.demo:echo
+              description: Echo the given text back verbatim.
+              parameters_schema:
+                type: object
+                properties:
+                  text: { type: string }
+                required: [text]
+
+  executor:
+    techniques:
+      - name: sequential
+
+  safety:
+    techniques:
+      - name: budget_only
+
+  output:
+    techniques:
+      - name: streaming_text
+        config: { chunk_size: 24 }
+
+  observability:
+    techniques:
+      - name: console
+      - name: jsonl
+        config: { directory: .agentkit/runs }
+
+budget:
+  max_steps: 8
+  max_tokens: 20000
+  max_seconds: 60
+  max_cost_usd: 0.10
+
+store:
+  type: jsonl
+  directory: .agentkit/runs

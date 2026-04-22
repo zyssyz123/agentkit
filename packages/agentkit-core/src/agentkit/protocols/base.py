@@ -20,9 +20,10 @@ ELEMENT_NAMES: tuple[str, ...] = (
 
 @dataclass(frozen=True)
 class BootContext:
-    """Passed to a Component's setup() — gives it config + access to a logger / event bus."""
+    """Passed to a Component's setup() — gives it config and shared infrastructure handles."""
 
     config: dict[str, Any] = field(default_factory=dict)
+    models: Any = None  # ModelHub | None — typed as Any to avoid an import cycle
 
 
 @dataclass(frozen=True)

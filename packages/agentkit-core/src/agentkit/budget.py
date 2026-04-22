@@ -31,15 +31,26 @@ class Budget:
     started_at: float = field(default_factory=time.monotonic)
 
     def remaining_seconds(self) -> float:
+        if self.max_seconds <= 0:
+            return float("inf")
         return max(0.0, self.max_seconds - (time.monotonic() - self.started_at))
 
     def exceeded(self) -> bool:
-        return (
-            self.used_steps >= self.max_steps
-            or self.used_tokens >= self.max_tokens
-            or self.used_cost_usd >= self.max_cost_usd
-            or self.remaining_seconds() <= 0
-        )
+        """Return True iff any *positive* limit has been reached.
+
+        A limit set to ``0`` (or negative) means **unlimited** for that dimension —
+        useful when callers don't care about cost / tokens but still want to bound
+        steps and wall-clock time.
+        """
+        if self.max_steps > 0 and self.used_steps >= self.max_steps:
+            return True
+        if self.max_tokens > 0 and self.used_tokens >= self.max_tokens:
+            return True
+        if self.max_cost_usd > 0 and self.used_cost_usd >= self.max_cost_usd:
+            return True
+        if self.max_seconds > 0 and self.remaining_seconds() <= 0:
+            return True
+        return False
 
     def consume(
         self,

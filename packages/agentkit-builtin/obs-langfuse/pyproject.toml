@@ -1,0 +1,17 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentkit-builtin-obs-langfuse"
+version = "0.1.0"
+description = "LangFuse observability technique for AgentKit."
+license = "Apache-2.0"
+requires-python = ">=3.11"
+dependencies = ["agentkit>=0.1.0", "langfuse>=2.50"]
+
+[project.entry-points."agentkit.techniques"]
+"observability.langfuse" = "agentkit_builtin_obs_langfuse:LangfuseObservability"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentkit_builtin_obs_langfuse"]
